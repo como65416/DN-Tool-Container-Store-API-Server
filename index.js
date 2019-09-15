@@ -1,7 +1,7 @@
 var express = require('express');
 var route = require('./src/route');
 var bodyParser = require('body-parser');
-var corsMiddleware = require('./src/Middlewares/cors-middleware').corsMiddleware;
+var corsMiddleware = require('./src/middlewares/cors-middleware').corsMiddleware;
 
 // read .env config
 require('dotenv').config({ path : '.env'});
