@@ -1,12 +1,12 @@
-var express = require('express');
-var route = require('./src/route');
-var bodyParser = require('body-parser');
-var corsMiddleware = require('./src/middlewares/cors-middleware').corsMiddleware;
+const express = require('express');
+const route = require('./src/route');
+const bodyParser = require('body-parser');
+const corsMiddleware = require('./src/middlewares/cors-middleware').corsMiddleware;
 
 // read .env config
 require('dotenv').config({ path : '.env'});
 
-var app = express();
+let app = express();
 
 // config for json content
 app.use(bodyParser.urlencoded({ extended: false }))
