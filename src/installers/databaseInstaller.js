@@ -44,8 +44,9 @@ async function initTableSchema() {
 async function initTableData() {
   let dbQuery = database.getQuery();
 
+  let salt = bcrypt.genSaltSync(10);
   await dbQuery.table('account').insert([
-    {username: 'admin', password: bcrypt.hashSync('admin', 10), name: 'Admin'}
+    {username: 'admin', password: bcrypt.hashSync('admin', salt), name: 'Admin'}
   ]);
 
   await dbQuery.table('permission').insert([
