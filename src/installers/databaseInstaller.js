@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const database = require('../libs/database.js');
 
-// databasse table schema
+// database table schema
 let table_schemas = {
   account: (t) => {
     t.increments('id').primary();
@@ -20,6 +20,23 @@ let table_schemas = {
     t.string('username', 50);
     t.integer('permission_id').unsigned();
     t.index('username');
+  },
+  package: (t) => {
+    t.increments('id').primary();
+    t.string('version', 20);
+    t.string('name', 60);
+    t.string('icon_filename', 80);
+    t.string('description', 300);
+    t.string('package_filename', 80);
+    t.string('publish_username', 50);
+    t.string('status', 10);
+    t.index('publish_username');
+    t.index('status');
+  },
+  store_option: (t) => {
+    t.increments('id').primary();
+    t.string('option_name', 20);
+    t.string('option_value', 30);
   }
 }
 
@@ -65,6 +82,10 @@ async function initTableData() {
     {username: 'admin', permission_id: 4},
     {username: 'admin', permission_id: 5},
     {username: 'admin', permission_id: 6},
+  ]);
+
+  await dbQuery.table('store_option').insert([
+    {option_name: 'icon_filename', option_value: ''}
   ]);
 }
 
