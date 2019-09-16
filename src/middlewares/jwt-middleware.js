@@ -6,7 +6,12 @@ function checkJWTMiddleware(req, res, next) {
     let match = authorization.match(/^Bearer +(.*?)$/);
     let jwt_key = process.env.JWT_KEY;
     let payload = jwt.verify(match[1], jwt_key);
+
     if (payload.exp > parseInt((new Date()).getTime() / 1000)) {
+      Object.assign(res.locals, {
+        username: payload.username,
+        permission: payload.permission
+      });
       next();
       return;
     }
