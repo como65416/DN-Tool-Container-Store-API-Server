@@ -42,8 +42,9 @@ async function updatePassword(req, res) {
   let username = res.locals.username;
   let password = req.body.password;
 
-  if (password.length < 8) {
-    res.status(400).send('password needs to be at least 8 characters');
+  if (password == null || password.length < 8) {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(400).send({message: 'password needs to be at least 8 characters'});
     return;
   }
 
@@ -55,10 +56,32 @@ async function updatePassword(req, res) {
       password: bcrypt.hashSync(password, salt)
     });
 
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).send({message: 'update success'});
+}
+
+async function updateProfile(req, res) {
+  let username = res.locals.username;
+  let name = req.body.name;
+
+  if (name == null || name.length < 1) {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(400).send({message: 'name needs to be at least 1 characters'});
+  }
+
+  let dbQuery = database.getQuery();
+  await dbQuery.table('account')
+    .where('username', '=', username)
+    .update({
+      name: name
+    });
+
+  res.setHeader('Content-Type', 'application/json');
   res.status(200).send({message: 'update success'});
 }
 
 module.exports = {
   login,
-  updatePassword
+  updatePassword,
+  updateProfile
 }
