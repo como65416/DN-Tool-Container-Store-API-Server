@@ -1,110 +1,28 @@
-const dotenv = require('dotenv');
-const fs = require('fs');
-const database = require('./src/libs/database.js');
-const databaseInstaller = require('./src/installers/databaseInstaller.js');
-const cryptoRandomString = require('crypto-random-string');
-const inquirer = require('inquirer');
+const express = require('express');
+const route = require('./src/route');
+const bodyParser = require('body-parser');
+const corsMiddleware = require('./src/middlewares/cors-middleware').corsMiddleware;
 
-inquirer.prompt([
-  {
-    type: 'input',
-    name: 'db_ip',
-    message: 'Database IP or Domain :'
-  },
-  {
-    type: 'input',
-    name: 'db_account',
-    message: 'Database account :'
-  },
-  {
-    type: 'password',
-    name: 'db_password',
-    message: 'Database password :'
-  },
-  {
-    type: 'input',
-    name: 'db_name',
-    message: 'Database name :'
-  },
-  {
-    type: 'input',
-    name: 'cors_available_domains',
-    message: 'CORS available domains:'
-  }
-])
-.then(answers => {
-  let jwt_key = cryptoRandomString({length: 32, type: 'base64'});
+// read .env config
+require('dotenv').config({ path : '.env'});
 
-  // generate .env content
-  let env_content = '';
-  env_content += '# JWT\n';
-  env_content += 'JWT_KEY=' + jwt_key + '\n';
-  env_content += '\n';
+let app = express();
 
-  env_content += '# MYSQL DATABASE' + '\n';
-  env_content += 'DATABASE_HOST=' + answers.db_ip + '\n';
-  env_content += 'DATABASE_USERNAME=' + answers.db_account + '\n';
-  env_content += 'DATABASE_PASSWORD=' + answers.db_password + '\n';
-  env_content += 'DATABASE_NAME=' + answers.db_name + '\n';
-  env_content += '\n';
+// config for json content
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
-  env_content += '# CORS' + '\n';
-  env_content += 'AVAILABLE_DOMAINS=' + answers.cors_available_domains + '\n';
-  env_content += '\n';
+// middleware
+app.use(corsMiddleware);
 
-  env_content += '# CRYPTO' + '\n';
-  env_content += 'CRYPTO_KEY=' + answers.cors_available_domains + '\n';
-  env_content += '\n';
+// route
+app.use('/', route);
 
-  // save .env file
-  let env_path = __dirname + "/.env";
-  fs.writeFileSync($env_path, env_content);
-})
-.catch(err => {
-  console.log(err);
+// Error Handler
+app.use(function(err, req, res, next) {
+  res.status(500).send('Something broke!');
 });
 
-//
-// console.log('\x1b[32m%s\x1b[0m', 'Setting database...');
-// rl.question('Database ip or domain:', (input) => {
-//
-// });
-//
-// // check .env file exist or not
-// let envFilePath = '.env';
-// if (!fs.existsSync(envFilePath)) {
-//   console.log('.env file not found');
-//   return;
-// }
-// dotenv.config({ path : '.env'});
-//
-// // check .env config
-// let required_config = [
-//   'JWT_KEY',
-//   'DATABASE_HOST',
-//   'DATABASE_USERNAME',
-//   'DATABASE_PASSWORD',
-//   'DATABASE_NAME',
-// ];
-//
-// let valid = true;
-// for (let field of required_config) {
-//   if (!process.env[field]) {
-//     console.log('not set [' + field + '] value in .env file');
-//     valid = false;
-//   }
-// }
-//
-// if (!valid) {
-//   return;
-// }
-//
-// // install database
-// databaseInstaller.install()
-//   .then(() => {
-//     console.log('\x1b[32m%s\x1b[0m', 'Install database success.');
-//   })
-//   .catch((e) => {
-//     console.log('\x1b[31m%s\x1b[0m', 'Install database fail :');
-//     console.log('    ' + e.message);
-//   });
+app.listen(3000, function () {
+  console.log('app listening on port 3000!');
+});
