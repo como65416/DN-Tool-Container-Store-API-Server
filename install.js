@@ -54,57 +54,22 @@ inquirer.prompt([
 
   env_content += '# CRYPTO' + '\n';
   env_content += 'CRYPTO_KEY=' + answers.cors_available_domains + '\n';
-  env_content += '\n';
 
-  // save .env file
+  // save and locd .env file
   let env_path = __dirname + "/.env";
-  fs.writeFileSync($env_path, env_content);
+  fs.writeFileSync(env_path, env_content);
+  dotenv.config({ path : '.env'});
+
+  // init database
+  databaseInstaller.install()
+    .then(() => {
+      console.log('\x1b[32m%s\x1b[0m', 'Install database success.');
+    })
+    .catch((e) => {
+      console.log('\x1b[31m%s\x1b[0m', 'Install database fail :');
+      console.log('    ' + e.message);
+    });
 })
 .catch(err => {
-  console.log(err);
+  console.log('input data error :', err);
 });
-
-//
-// console.log('\x1b[32m%s\x1b[0m', 'Setting database...');
-// rl.question('Database ip or domain:', (input) => {
-//
-// });
-//
-// // check .env file exist or not
-// let envFilePath = '.env';
-// if (!fs.existsSync(envFilePath)) {
-//   console.log('.env file not found');
-//   return;
-// }
-// dotenv.config({ path : '.env'});
-//
-// // check .env config
-// let required_config = [
-//   'JWT_KEY',
-//   'DATABASE_HOST',
-//   'DATABASE_USERNAME',
-//   'DATABASE_PASSWORD',
-//   'DATABASE_NAME',
-// ];
-//
-// let valid = true;
-// for (let field of required_config) {
-//   if (!process.env[field]) {
-//     console.log('not set [' + field + '] value in .env file');
-//     valid = false;
-//   }
-// }
-//
-// if (!valid) {
-//   return;
-// }
-//
-// // install database
-// databaseInstaller.install()
-//   .then(() => {
-//     console.log('\x1b[32m%s\x1b[0m', 'Install database success.');
-//   })
-//   .catch((e) => {
-//     console.log('\x1b[31m%s\x1b[0m', 'Install database fail :');
-//     console.log('    ' + e.message);
-//   });
