@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const algorithm = process.env.CRYPTO_CIPHER;
+const algorithm = 'AES-256-CBC';
 const key = process.env.CRYPTO_KEY;
 const iv_length = 16;
 
