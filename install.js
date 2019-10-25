@@ -34,6 +34,7 @@ inquirer.prompt([
 ])
 .then(answers => {
   let jwt_key = cryptoRandomString({length: 32, type: 'base64'});
+  let crypto_key = cryptoRandomString({length: 32, type: 'base64'});
 
   // generate .env content
   let env_content = '';
@@ -53,7 +54,7 @@ inquirer.prompt([
   env_content += '\n';
 
   env_content += '# CRYPTO' + '\n';
-  env_content += 'CRYPTO_KEY=' + answers.cors_available_domains + '\n';
+  env_content += 'CRYPTO_KEY=' + crypto_key + '\n';
 
   // save and locd .env file
   let env_path = __dirname + "/.env";
@@ -66,7 +67,7 @@ inquirer.prompt([
       console.log('\x1b[32m%s\x1b[0m', 'Install database success.');
     })
     .catch((e) => {
-      console.log('\x1b[31m%s\x1b[0m', 'Install database fail :');
+      console.log('\x1b[31m%s\x1b[0m', 'Install database fail :', e.message);
     });
 })
 .catch(err => {
