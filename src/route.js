@@ -3,10 +3,12 @@ const router = express.Router();
 const login = require('./actions/member').login;
 const updatePassword = require('./actions/member').updatePassword;
 const updateProfile = require('./actions/member').updateProfile;
+const addNewPackage = require('./actions/package').addNewPackage;
 const checkJWTMiddleware = require('./middlewares/jwt-middleware').checkJWTMiddleware;
 
 router.post('/login', login);
-router.post('/updatePassword', [checkJWTMiddleware], updatePassword);
-router.post('/updateProfile', [checkJWTMiddleware], updateProfile);
+router.post('/user/update-password', [checkJWTMiddleware], updatePassword);
+router.post('/user/update-profile', [checkJWTMiddleware], updateProfile);
+router.post('/packages', [checkJWTMiddleware], addNewPackage);
 
 module.exports = router;
