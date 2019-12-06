@@ -2,6 +2,10 @@ const bcrypt = require('bcrypt');
 const database = require('../libs/database.js');
 const jwt = require('jsonwebtoken');
 
+/**
+ * @apiParam {String} username User account username.
+ * @apiParam {String} password User password.
+ */
 async function login(req, res) {
   res.setHeader('Content-Type', 'application/json');
   let username = req.body.username;
@@ -28,16 +32,20 @@ async function login(req, res) {
     };
     let token = jwt.sign(payload, jwt_key);
 
-    res.send({
-      success : true,
+    res.status(200).send({
       token : token
     })
 
     return;
   }
-  res.send({success: false});
+
+  res.status(401).send({'message': 'login fail'});
 }
 
+/**
+ * @apiHeader {String} Authorization JWT token.
+ * @apiParam  {String} password      User account username.
+ */
 async function updatePassword(req, res) {
   let username = res.locals.username;
   let password = req.body.password;
@@ -60,6 +68,10 @@ async function updatePassword(req, res) {
   res.status(200).send({message: 'update success'});
 }
 
+/**
+ * @apiHeader {String} Authorization JWT token.
+ * @apiParam  {String} name          User name.
+ */
 async function updateProfile(req, res) {
   let username = res.locals.username;
   let name = req.body.name;
