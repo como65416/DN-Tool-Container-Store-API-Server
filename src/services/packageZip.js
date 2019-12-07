@@ -37,12 +37,14 @@ async function extractPackageIcon(packagePath, iconSavePath) {
   }
 }
 
-async function updatePackageManifestConfig(packagePath, config) {
+async function updatePackageManifestConfig(packagePath, updateData) {
+  let mainfestConfig = await readPackageManifestConfig(packagePath);
+  Object.assign(mainfestConfig, updateData);
   let zip = new AdmZip(packagePath);
-  let newContent = JSON.stringify(config, null, 2)
+  let newContent = JSON.stringify(mainfestConfig, null, 2);
   zip.deleteFile("dn-manifest.json");
   zip.addFile("dn-manifest.json", Buffer.alloc(newContent.length, newContent));
-  zip.writeZip(packagePath);
+  zip.writeZip();
 }
 
 module.exports = {

@@ -36,11 +36,11 @@ async function addNewPackage(req, res) {
   }
 
   // update zip manifest.json config
-  let mainfestConfig = await packageZipService.readPackageManifestConfig(packageFile.tempFilePath);
-  mainfestConfig.packageId = crypt.encrypt(packageId.toString());
-  mainfestConfig.description = description;
-  mainfestConfig.packageName = packageName;
-  await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, mainfestConfig);
+  await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, {
+    'packageId': crypt.encrypt(packageId.toString()),
+    description,
+    packageName
+  });
 
   // move zip to package dir
   let packageDirPath = __dirname + "/../../storage/package/";
@@ -82,6 +82,11 @@ async function updatePackage(req, res) {
 
   let packageDirPath = __dirname + "/../../storage/package/";
   if (packageFile != null) {
+    // update version
+    let version = 'v' + dateFormat('yyyymmdd.HHMMss');
+    Object.assign(databaseUpdateDatas, {'version': version});
+    Object.assign(manifestUpdateDatas, {'version': version});
+
     // extract icon file from package zip
     let iconDirPath = __dirname + "/../../storage/icon/";
     if (package.icon_filename != null && package.icon_filename != '') {
@@ -90,18 +95,13 @@ async function updatePackage(req, res) {
     let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
     let iconInfo = await packageZipService.extractPackageIcon(packageFile.tempFilePath, iconDirPath + "/" + iconSaveFilename);
     Object.assign(databaseUpdateDatas, {'icon_filename': (iconInfo != null) ? iconSaveFilename : ''});
-    Object.assign(databaseUpdateDatas, {'version': 'v' + dateFormat('yyyymmdd.HHMMss')})
 
     // update manifest information (new zip)
-    let mainfestConfig = await packageZipService.readPackageManifestConfig(packageFile.tempFilePath);
-    Object.assign(mainfestConfig, manifestUpdateDatas);
-    await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, mainfestConfig);
+    await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, manifestUpdateDatas);
     packageFile.mv(packageDirPath + package.package_filename);
   } else {
     // update manifest information (old zip)
-    let mainfestConfig = await packageZipService.readPackageManifestConfig(packageDirPath + package.package_filename);
-    Object.assign(mainfestConfig, manifestUpdateDatas);
-    await packageZipService.updatePackageManifestConfig(packageDirPath + package.package_filename, mainfestConfig);
+    await packageZipService.updatePackageManifestConfig(packageDirPath + package.package_filename, manifestUpdateDatas);
   }
 
   // update information in database
