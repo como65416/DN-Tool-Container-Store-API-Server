@@ -60,6 +60,13 @@ async function addNewPackage(req, res) {
   })
 }
 
+/**
+ * @apiHeader {String} Authorization JWT token.
+ * @apiParam  {String} id            package id
+ * @apiParam  {String} name          package name
+ * @apiParam  {String} description   package description]
+ * @apiParam  {File}   packageFile   package file zip
+ */
 async function updatePackage(req, res) {
   let packageId = req.params.id;
   let username = res.locals.username;
@@ -114,7 +121,40 @@ async function updatePackage(req, res) {
   res.status(204).send('')
 }
 
+/**
+ * @apiHeader {String} Authorization JWT token.
+ * @apiParam  {String} id            package id
+ */
+async function deletePackage(req, res) {
+  let packageId = req.params.id;
+  let username = res.locals.username;
+  let dbQuery = database.getQuery();
+  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+
+  if (package == null || package.publish_username != username) {
+    res.status(401).send({'message': 'Unauthorized'});
+  }
+
+  // delete icon
+  let iconDirPath = __dirname + "/../../storage/icon/";
+  if (package.icon_filename != null && package.icon_filename != '') {
+    fs.unlinkSync(iconDirPath + package.icon_filename);
+  }
+
+  // delete icon
+  let packageDirPath = __dirname + "/../../storage/package/";
+  if (package.package_filename != null && package.package_filename != '') {
+    fs.unlinkSync(packageDirPath + package.package_filename);
+  }
+
+  // delete from database
+  await dbQuery.table('package').where('id', '=', packageId).delete();
+
+  res.status(204).send('')
+}
+
 module.exports = {
   addNewPackage,
-  updatePackage
+  updatePackage,
+  deletePackage,
 }
