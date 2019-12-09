@@ -6,6 +6,28 @@ const crypt = require('../libs/crypt.js');
 const packageZipService = require('../services/packageZip.js');
 const environment = require('../services/environment.js')
 
+async function listStorePackage(req, res) {
+  let dbQuery = database.getQuery();
+  let baseUrl = req.protocol + "://" + req.headers.host;
+
+  let packages = await dbQuery.table('package')
+    .where('status', '=', 'published');
+  let storePackages = packages.map(p => {
+    let encryptedPackageId = crypt.encrypt(p.id.toString())
+    return {
+      packageId: encryptedPackageId,
+      version: p.version,
+      packageName: p.name,
+      iconUrl: baseUrl + "/package/" + encryptedPackageId + "/icon",
+      description: p.description,
+      downloadUrl: baseUrl + "/package/" + encryptedPackageId + "/download",
+    }
+  })
+
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).send(storePackages);
+}
+
 /**
  * @apiHeader {String} Authorization JWT token.
  * @apiParam  {String} name              package name
@@ -158,4 +180,5 @@ module.exports = {
   addNewPackage,
   updatePackage,
   deletePackage,
+  listStorePackage,
 }

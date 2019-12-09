@@ -6,8 +6,10 @@ const updateProfile = require('./actions/member').updateProfile;
 const addNewPackage = require('./actions/package').addNewPackage;
 const updatePackage = require('./actions/package').updatePackage;
 const deletePackage = require('./actions/package').deletePackage;
+const listStorePackage = require('./actions/package').listStorePackage;
 const checkJWTMiddleware = require('./middlewares/jwt-middleware').checkJWTMiddleware;
 
+router.get('/store-packages', listStorePackage);
 router.post('/login', login);
 router.post('/user/update-password', [checkJWTMiddleware], updatePassword);
 router.post('/user/update-profile', [checkJWTMiddleware], updateProfile);
