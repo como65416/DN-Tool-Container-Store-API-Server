@@ -1,6 +1,7 @@
 const AdmZip = require('adm-zip');
 const path = require('path');
 const fs = require('fs');
+const environment = require('../services/environment.js')
 
 /**
  * @param  {String} packagePath  package zip path
@@ -17,7 +18,7 @@ async function readPackageManifestConfig(packagePath) {
  * @return {Object|null}         image information (if no icon in packages return null)
  */
 async function extractPackageIcon(packagePath, iconSavePath) {
-  let tmpDirPath = __dirname + "/../../storage/tmp/";
+  let tmpDirPath = environment.getTempFolderPath();
   let manifestConfig = await readPackageManifestConfig(packagePath);
   let iconFilePath = manifestConfig.iconFile;
   if (iconFilePath == null || iconFilePath == '') {

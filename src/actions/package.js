@@ -4,6 +4,7 @@ const fs = require('fs');
 const uniqid = require('uniqid');
 const crypt = require('../libs/crypt.js');
 const packageZipService = require('../services/packageZip.js');
+const environment = require('../services/environment.js')
 
 /**
  * @apiHeader {String} Authorization JWT token.
@@ -28,7 +29,7 @@ async function addNewPackage(req, res) {
     }))[0];
 
   // extract icon from package zip
-  let iconDirPath = __dirname + "/../../storage/icon/";
+  let iconDirPath = environment.getIconFolderPath();
   let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
   let iconInfo = await packageZipService.extractPackageIcon(packageFile.tempFilePath, iconDirPath + "/" + iconSaveFilename)
   if (iconInfo == null) {
@@ -43,7 +44,7 @@ async function addNewPackage(req, res) {
   });
 
   // move zip to package dir
-  let packageDirPath = __dirname + "/../../storage/package/";
+  let packageDirPath = environment.getPackageFolderPath();
   let savePackageName = packageId + '-' + uniqid() + ".zip";
   packageFile.mv(packageDirPath + savePackageName);
 
@@ -87,7 +88,7 @@ async function updatePackage(req, res) {
   Object.assign(manifestUpdateDatas, (description != null) ? {description} : {});
   Object.assign(manifestUpdateDatas, (packageName != null) ? {'packageName': packageName} : {});
 
-  let packageDirPath = __dirname + "/../../storage/package/";
+  let packageDirPath = environment.getPackageFolderPath();
   if (packageFile != null) {
     // update version
     let version = 'v' + dateFormat('yyyymmdd.HHMMss');
@@ -95,7 +96,7 @@ async function updatePackage(req, res) {
     Object.assign(manifestUpdateDatas, {'version': version});
 
     // extract icon file from package zip
-    let iconDirPath = __dirname + "/../../storage/icon/";
+    let iconDirPath = environment.getIconFolderPath();
     if (package.icon_filename != null && package.icon_filename != '') {
       fs.unlinkSync(iconDirPath + package.icon_filename);
     }
@@ -136,13 +137,13 @@ async function deletePackage(req, res) {
   }
 
   // delete icon
-  let iconDirPath = __dirname + "/../../storage/icon/";
+  let iconDirPath = environment.getIconFolderPath();
   if (package.icon_filename != null && package.icon_filename != '') {
     fs.unlinkSync(iconDirPath + package.icon_filename);
   }
 
   // delete icon
-  let packageDirPath = __dirname + "/../../storage/package/";
+  let packageDirPath = environment.getPackageFolderPath();
   if (package.package_filename != null && package.package_filename != '') {
     fs.unlinkSync(packageDirPath + package.package_filename);
   }
