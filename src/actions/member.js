@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const accountService = require('../services/account.js');
 const database = require('../services/database.js');
 const jwt = require('jsonwebtoken');
 
@@ -11,23 +12,13 @@ async function login(req, res) {
   let username = req.body.username;
   let password = req.body.password;
 
-  let dbQuery = database.getQuery();
-  let accountData = await dbQuery.table('account')
-    .where('username', '=', username)
-    .first();
-
-  if (accountData != null && bcrypt.compareSync(password, accountData.password)) {
+  if (await accountService.checkAccountPassword(username, password)) {
     let jwt_key = process.env.JWT_KEY;
-    let accountPermissions = await dbQuery.table('account_permission')
-      .select('permission_id')
-      .where('username', '=', username);
-    let permissions = await dbQuery.table('permission')
-      .select('name')
-      .whereIn('id', accountPermissions.map(d => d.permission_id));
+    let permissions = await accountService.getAccountPermision(username);
 
     let payload = {
-      username: req.body.username,
-      permission: permissions.map(d => d.name),
+      username: username,
+      permission: permissions,
       exp: parseInt((new Date()).getTime() / 1000) + 86400
     };
     let token = jwt.sign(payload, jwt_key);
@@ -56,13 +47,8 @@ async function updatePassword(req, res) {
     return;
   }
 
-  let dbQuery = database.getQuery();
-  let salt = bcrypt.genSaltSync(10);
-  await dbQuery.table('account')
-    .where('username', '=', username)
-    .update({
-      password: bcrypt.hashSync(password, salt)
-    });
+  let hashed_password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+  await accountService.updateAccountData(username, {password: hashed_password});
 
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send({message: 'update success'});
@@ -81,12 +67,7 @@ async function updateProfile(req, res) {
     res.status(400).send({message: 'name needs to be at least 1 characters'});
   }
 
-  let dbQuery = database.getQuery();
-  await dbQuery.table('account')
-    .where('username', '=', username)
-    .update({
-      name: name
-    });
+  await accountService.updateAccountData(username, {name});
 
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send({message: 'update success'});
