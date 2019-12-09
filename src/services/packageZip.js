@@ -37,6 +37,10 @@ async function extractPackageIcon(packagePath, iconSavePath) {
   }
 }
 
+/**
+ * @param  {String} packagePath package zip path
+ * @param  {Object} updateData  update manifest config data
+ */
 async function updatePackageManifestConfig(packagePath, updateData) {
   let mainfestConfig = await readPackageManifestConfig(packagePath);
   Object.assign(mainfestConfig, updateData);
