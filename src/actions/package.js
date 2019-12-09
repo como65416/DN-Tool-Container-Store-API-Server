@@ -1,4 +1,4 @@
-const database = require('../libs/database.js');
+const database = require('../services/database.js');
 const dateFormat = require('dateformat');
 const fs = require('fs');
 const uniqid = require('uniqid');
