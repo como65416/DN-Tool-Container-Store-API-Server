@@ -4,6 +4,7 @@ const fs = require('fs');
 const uniqid = require('uniqid');
 const crypt = require('../libs/crypt.js');
 const packageZipService = require('../services/packageZip.js');
+const path = require('path');
 const environment = require('../services/environment.js')
 
 async function listPackages(req, res) {
@@ -19,7 +20,7 @@ async function listPackages(req, res) {
       packageId: encryptedPackageId,
       packageName: p.name,
       version: p.version,
-      iconUrl: baseUrl + "/package/" + encryptedPackageId + "/icon",
+      iconUrl: baseUrl + "/packages/" + encryptedPackageId + "/icon",
       description: p.description,
       status: p.status,
     }
@@ -41,9 +42,9 @@ async function listStorePackage(req, res) {
       packageId: encryptedPackageId,
       version: p.version,
       packageName: p.name,
-      iconUrl: baseUrl + "/package/" + encryptedPackageId + "/icon",
+      iconUrl: baseUrl + "/packages/" + encryptedPackageId + "/icon",
       description: p.description,
-      downloadUrl: baseUrl + "/package/" + encryptedPackageId + "/download",
+      downloadUrl: baseUrl + "/packages/" + encryptedPackageId + "/download",
     }
   })
 
@@ -201,10 +202,44 @@ async function deletePackage(req, res) {
   res.status(204).send('')
 }
 
+async function getPackageIcon(req, res) {
+  let packageId = crypt.decrypt(req.params.id) || 0 ;
+  let dbQuery = database.getQuery();
+  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+
+  if (package == null) {
+    res.status(404).send('Not found');
+    return;
+  }
+
+  let iconDirPath = environment.getIconFolderPath();
+  if (fs.existsSync(iconDirPath + package.icon_filename)) {
+    res.status(200).sendFile(path.resolve(iconDirPath + package.icon_filename));
+    return;
+  }
+  res.status(200).sendFile(path.resolve(environment.getDefaultIconPath()));
+}
+
+async function downloadPackage(req, res) {
+  let packageId = crypt.decrypt(req.params.id) || 0 ;
+  let dbQuery = database.getQuery();
+  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+
+  let packageDirPath = environment.getPackageFolderPath();
+  if (package == null && !fs.existsSync(packageDirPath + package.package_filename)) {
+    res.status(404).send('Not found');
+    return;
+  }
+
+  res.status(200).download(path.resolve(packageDirPath + package.package_filename), 'package.zip');
+}
+
 module.exports = {
   addNewPackage,
   updatePackage,
   deletePackage,
   listPackages,
   listStorePackage,
+  getPackageIcon,
+  downloadPackage,
 }

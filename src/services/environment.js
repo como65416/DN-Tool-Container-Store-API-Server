@@ -11,8 +11,13 @@ function getTempFolderPath() {
   return __dirname + "/../../storage/tmp/";
 }
 
+function getDefaultIconPath() {
+  return __dirname + "/../../static_files/default-package-icon.png";
+}
+
 module.exports = {
   getPackageFolderPath,
   getIconFolderPath,
   getTempFolderPath,
+  getDefaultIconPath,
 }
