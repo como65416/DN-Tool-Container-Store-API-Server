@@ -6,6 +6,29 @@ const crypt = require('../libs/crypt.js');
 const packageZipService = require('../services/packageZip.js');
 const environment = require('../services/environment.js')
 
+async function listPackages(req, res) {
+  let dbQuery = database.getQuery();
+  let baseUrl = req.protocol + "://" + req.headers.host;
+  let username = res.locals.username;
+  let packages = await dbQuery.table('package')
+    .where('publish_username', '=', username);
+
+  let myPackages = packages.map(p => {
+    let encryptedPackageId = crypt.encrypt(p.id.toString())
+    return {
+      packageId: encryptedPackageId,
+      packageName: p.name,
+      version: p.version,
+      iconUrl: baseUrl + "/package/" + encryptedPackageId + "/icon",
+      description: p.description,
+      status: p.status,
+    }
+  })
+
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).send(myPackages);
+}
+
 async function listStorePackage(req, res) {
   let dbQuery = database.getQuery();
   let baseUrl = req.protocol + "://" + req.headers.host;
@@ -91,7 +114,7 @@ async function addNewPackage(req, res) {
  * @apiParam  {File}   packageFile   package file zip
  */
 async function updatePackage(req, res) {
-  let packageId = req.params.id;
+  let packageId = crypt.decrypt(req.params.id) || 0 ;
   let username = res.locals.username;
   let packageName = req.body.name;
   let description = req.body.description;
@@ -101,6 +124,7 @@ async function updatePackage(req, res) {
 
   if (package == null || package.publish_username != username) {
     res.status(401).send({'message': 'Unauthorized'});
+    return;
   }
 
   let databaseUpdateDatas = {};
@@ -119,7 +143,7 @@ async function updatePackage(req, res) {
 
     // extract icon file from package zip
     let iconDirPath = environment.getIconFolderPath();
-    if (package.icon_filename != null && package.icon_filename != '') {
+    if (package.icon_filename != null && package.icon_filename != '' && fs.existsSync(iconDirPath + package.icon_filename)) {
       fs.unlinkSync(iconDirPath + package.icon_filename);
     }
     let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
@@ -149,24 +173,25 @@ async function updatePackage(req, res) {
  * @apiParam  {String} id            package id
  */
 async function deletePackage(req, res) {
-  let packageId = req.params.id;
+  let packageId = crypt.decrypt(req.params.id) || 0;
   let username = res.locals.username;
   let dbQuery = database.getQuery();
   let package = await dbQuery.table('package').where('id', '=', packageId).first();
 
   if (package == null || package.publish_username != username) {
     res.status(401).send({'message': 'Unauthorized'});
+    return;
   }
 
   // delete icon
   let iconDirPath = environment.getIconFolderPath();
-  if (package.icon_filename != null && package.icon_filename != '') {
+  if (package.icon_filename != null && package.icon_filename != '' && fs.existsSync(iconDirPath + package.icon_filename)) {
     fs.unlinkSync(iconDirPath + package.icon_filename);
   }
 
   // delete icon
   let packageDirPath = environment.getPackageFolderPath();
-  if (package.package_filename != null && package.package_filename != '') {
+  if (package.package_filename != null && package.package_filename != '' && fs.existsSync(packageDirPath + package.package_filename)) {
     fs.unlinkSync(packageDirPath + package.package_filename);
   }
 
@@ -180,5 +205,6 @@ module.exports = {
   addNewPackage,
   updatePackage,
   deletePackage,
+  listPackages,
   listStorePackage,
 }
