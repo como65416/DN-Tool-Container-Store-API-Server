@@ -2,7 +2,7 @@ const database = require('../services/database.js');
 const dateFormat = require('dateformat');
 const fs = require('fs');
 const uniqid = require('uniqid');
-const crypt = require('../libs/crypt.js');
+const encoder = require('../libs/encoder.js');
 const packageZipService = require('../services/packageZip.js');
 const path = require('path');
 const environment = require('../services/environment.js')
@@ -15,12 +15,12 @@ async function listPackages(req, res) {
     .where('publish_username', '=', username);
 
   let myPackages = packages.map(p => {
-    let encryptedPackageId = crypt.encrypt(p.id.toString())
+    let encodedPackageId = encoder.encode(p.id.toString())
     return {
-      packageId: encryptedPackageId,
+      packageId: encodedPackageId,
       packageName: p.name,
       version: p.version,
-      iconUrl: baseUrl + "/packages/" + encryptedPackageId + "/icon",
+      iconUrl: baseUrl + "/packages/" + encodedPackageId + "/icon",
       description: p.description,
       status: p.status,
     }
@@ -28,28 +28,6 @@ async function listPackages(req, res) {
 
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send(myPackages);
-}
-
-async function listStorePackage(req, res) {
-  let dbQuery = database.getQuery();
-  let baseUrl = req.protocol + "://" + req.headers.host;
-
-  let packages = await dbQuery.table('package')
-    .where('status', '=', 'published');
-  let storePackages = packages.map(p => {
-    let encryptedPackageId = crypt.encrypt(p.id.toString())
-    return {
-      packageId: encryptedPackageId,
-      version: p.version,
-      packageName: p.name,
-      iconUrl: baseUrl + "/packages/" + encryptedPackageId + "/icon",
-      description: p.description,
-      downloadUrl: baseUrl + "/packages/" + encryptedPackageId + "/download",
-    }
-  })
-
-  res.setHeader('Content-Type', 'application/json');
-  res.status(200).send(storePackages);
 }
 
 /**
@@ -84,7 +62,7 @@ async function addNewPackage(req, res) {
 
   // update zip manifest.json config
   await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, {
-    'packageId': crypt.encrypt(packageId.toString()),
+    'packageId': encoder.encode(packageId.toString()),
     description,
     packageName
   });
@@ -115,7 +93,7 @@ async function addNewPackage(req, res) {
  * @apiParam  {File}   packageFile   package file zip
  */
 async function updatePackage(req, res) {
-  let packageId = crypt.decrypt(req.params.id) || 0 ;
+  let packageId = encoder.decode(req.params.id) || 0 ;
   let username = res.locals.username;
   let packageName = req.body.name;
   let description = req.body.description;
@@ -141,6 +119,7 @@ async function updatePackage(req, res) {
     let version = 'v' + dateFormat('yyyymmdd.HHMMss');
     Object.assign(databaseUpdateDatas, {'version': version});
     Object.assign(manifestUpdateDatas, {'version': version});
+    Object.assign(manifestUpdateDatas, {'packageId': encoder.encode(packageId)});
 
     // extract icon file from package zip
     let iconDirPath = environment.getIconFolderPath();
@@ -174,7 +153,7 @@ async function updatePackage(req, res) {
  * @apiParam  {String} id            package id
  */
 async function deletePackage(req, res) {
-  let packageId = crypt.decrypt(req.params.id) || 0;
+  let packageId = encoder.decode(req.params.id) || 0;
   let username = res.locals.username;
   let dbQuery = database.getQuery();
   let package = await dbQuery.table('package').where('id', '=', packageId).first();
@@ -203,7 +182,7 @@ async function deletePackage(req, res) {
 }
 
 async function getPackageIcon(req, res) {
-  let packageId = crypt.decrypt(req.params.id) || 0 ;
+  let packageId = encoder.decode(req.params.id) || 0 ;
   let dbQuery = database.getQuery();
   let package = await dbQuery.table('package').where('id', '=', packageId).first();
 
@@ -221,7 +200,7 @@ async function getPackageIcon(req, res) {
 }
 
 async function downloadPackage(req, res) {
-  let packageId = crypt.decrypt(req.params.id) || 0 ;
+  let packageId = encoder.decode(req.params.id) || 0 ;
   let dbQuery = database.getQuery();
   let package = await dbQuery.table('package').where('id', '=', packageId).first();
 
@@ -239,7 +218,6 @@ module.exports = {
   updatePackage,
   deletePackage,
   listPackages,
-  listStorePackage,
   getPackageIcon,
   downloadPackage,
 }
