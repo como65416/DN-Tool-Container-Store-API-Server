@@ -14,11 +14,9 @@ async function login(req, res) {
 
   if (await accountService.checkAccountPassword(username, password)) {
     let jwt_key = process.env.JWT_KEY;
-    let permissions = await accountService.getAccountPermision(username);
 
     let payload = {
       username: username,
-      permission: permissions,
       exp: parseInt((new Date()).getTime() / 1000) + 86400
     };
     let token = jwt.sign(payload, jwt_key);

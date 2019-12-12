@@ -10,7 +10,6 @@ function checkJWTMiddleware(req, res, next) {
     if (payload.exp > parseInt((new Date()).getTime() / 1000)) {
       Object.assign(res.locals, {
         username: payload.username,
-        permission: payload.permission
       });
       next();
       return;
