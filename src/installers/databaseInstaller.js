@@ -56,7 +56,8 @@ async function initTableData() {
   ]);
 
   await dbQuery.table('store_option').insert([
-    {option_name: 'icon_filename', option_value: ''}
+    {option_name: 'store_name', option_value: 'My Custom DN Tool Package Store'},
+    {option_name: 'icon_filename', option_value: ''},
   ]);
 }
 

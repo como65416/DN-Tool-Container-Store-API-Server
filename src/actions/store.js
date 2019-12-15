@@ -13,8 +13,12 @@ async function listStorePackage(req, res) {
   let dbQuery = database.getQuery();
   let baseUrl = req.protocol + "://" + req.headers.host;
 
+  let storeOption = await dbQuery.table('store_option')
+    .where('option_name', '=', 'store_name')
+    .first();
   let packages = await dbQuery.table('package')
     .where('status', '=', 'published');
+
   let storePackages = packages.map(p => {
     let encodedPackageId = encoder.encode(p.id.toString())
     return {
@@ -29,6 +33,7 @@ async function listStorePackage(req, res) {
 
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send({
+    storeName: storeOption.option_value,
     storeIcon: baseUrl + '/store/icon',
     packages: storePackages,
   });
