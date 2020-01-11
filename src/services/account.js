@@ -7,7 +7,7 @@ async function checkAccountPassword(username, password) {
     .where('username', '=', username)
     .first();
 
-  return bcrypt.compareSync(password, accountData.password);s
+  return bcrypt.compareSync(password, accountData.password);
 }
 
 /**
