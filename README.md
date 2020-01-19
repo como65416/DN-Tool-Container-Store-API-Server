@@ -9,25 +9,25 @@ I's used for manage personal [DN-Tool-Container](https://github.com/como65416/Dn
 - MySQL
 - Node.js
 
-## Install package
+## Install Package
 
 ```
 npm ci
 ```
 
-## Install server
+## Install Server
 
 ```
 node install.js
 ```
 
-## Start server
+## Start Server
 
 ```
 node start-server.js
 ```
 
-### Default admin account
+### Default Admin account
 
 | username | password |
 | --- | --- | 
