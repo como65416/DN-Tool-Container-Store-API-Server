@@ -1,4 +1,8 @@
 
+function getStoragePath() {
+  return __dirname + "/../../storage/";
+}
+
 function getPackageFolderPath() {
   return __dirname + "/../../storage/package/";
 }
@@ -16,6 +20,7 @@ function getDefaultIconPath() {
 }
 
 module.exports = {
+  getStoragePath,
   getPackageFolderPath,
   getIconFolderPath,
   getTempFolderPath,

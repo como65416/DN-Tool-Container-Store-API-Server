@@ -1,12 +1,38 @@
 const encoder = require('../libs/encoder.js');
 const database = require('../services/database.js');
 const storeService = require('../services/store.js');
+const environment = require('../services/environment.js')
 const path = require('path');
 
 async function getIcon(req, res) {
   let iconPath = await storeService.getStoreIconPath();
 
   res.status(200).sendFile(path.resolve(iconPath));
+}
+
+async function updateStoreInfo(req, res) {
+  let dbQuery = database.getQuery();
+  let storeName = req.body.storeName;
+  let storeIcon = (req.files != null) ? req.files.storeIcon : null;
+
+  if (storeName != null) {
+    await dbQuery.table('store_option')
+      .where('option_name', '=', 'store_name')
+      .update({'option_value': storeName});
+  }
+  if (storeIcon != null) {
+    let storeOption = await dbQuery.table('store_option')
+      .where('option_name', '=', 'icon_filename');
+    let originIconPath = storeOption.option_value;
+    let iconSavePath = originIconPath || 'store-icon.jpg';
+    storeIcon.mv(environment.getStoragePath() + iconSavePath);
+
+    await dbQuery.table('store_option')
+      .where('option_name', '=', 'icon_filename')
+      .update({'option_value': iconSavePath});
+  }
+
+  res.status(204).send('')
 }
 
 async function listStorePackage(req, res) {
@@ -41,5 +67,6 @@ async function listStorePackage(req, res) {
 
 module.exports = {
   getIcon,
+  updateStoreInfo,
   listStorePackage,
 }

@@ -10,11 +10,13 @@ const listPackages = require('./actions/package').listPackages;
 const downloadPackage = require('./actions/package').downloadPackage;
 const getPackageIcon = require('./actions/package').getPackageIcon;
 const listStorePackage = require('./actions/store').listStorePackage;
+const updateStoreInfo = require('./actions/store').updateStoreInfo;
 const getStoreIcon = require('./actions/store').getIcon;
 const checkJWTMiddleware = require('./middlewares/jwt-middleware').checkJWTMiddleware;
 
 router.get('/store/packages', listStorePackage);
 router.get('/store/icon', getStoreIcon);
+router.put('/store/info', updateStoreInfo);
 router.get('/packages/:id/icon', getPackageIcon);
 router.get('/packages/:id/download', downloadPackage);
 router.post('/user/login', login);
