@@ -49,7 +49,7 @@ async function updatePassword(req, res) {
   await accountService.updateAccountData(username, {password: hashed_password});
 
   res.setHeader('Content-Type', 'application/json');
-  res.status(200).send({message: 'update success'});
+  res.status(204).send('');
 }
 
 /**
@@ -68,7 +68,7 @@ async function updateProfile(req, res) {
   await accountService.updateAccountData(username, {name});
 
   res.setHeader('Content-Type', 'application/json');
-  res.status(200).send({message: 'update success'});
+  res.status(204).send('');
 }
 
 module.exports = {
