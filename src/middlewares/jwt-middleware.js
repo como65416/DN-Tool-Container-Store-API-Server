@@ -18,7 +18,7 @@ function checkJWTMiddleware(req, res, next) {
     // do nothing
   }
 
-  res.status(403).send('token not valid');
+  res.status(401).send('token not valid');
 }
 
 module.exports = {
