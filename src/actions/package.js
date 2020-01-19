@@ -81,7 +81,7 @@ async function addNewPackage(req, res) {
     });
 
   res.status(201).send({
-    packageId: packageId
+    packageId: encoder.encode(packageId)
   })
 }
 
