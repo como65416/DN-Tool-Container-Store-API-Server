@@ -1,0 +1,268 @@
+openapi: 3.0.0
+info:
+  title: DN Tool Container Store API
+  version: draft
+paths:
+  /store/packages:
+    get:
+      summary: Get store information and all available to install packages
+      tags:
+        - store
+      responses:
+        '200':
+          description: store information and all available to install packages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  storeName:
+                    type: string
+                    example: "DN Tool Store"
+                  storeIcon:
+                    type: string
+                    example: "http://dn-api-example.com/store-icon.png"
+                  packages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        packageId:
+                          type: string
+                          example: "Vn"
+                        version:
+                          type: string
+                          example: "v20200119.145730"
+                        packageName:
+                          type: string
+                          example: "Beautifier/Formatter"
+                        iconUrl:
+                          type: string
+                          example: "http://dn-api-example.com/package-Vn-icon.png"
+                        description:
+                          type: string
+                          example: "Some code beautify tool"
+                        downloadUrl:
+                          type: string
+                          example: "http://dn-api-example.com/package-Vn.zip"
+  /store/info:
+    put:
+      summary: Update store information
+      tags:
+        - store
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                storeName:
+                  type: string
+                  example: "Beautifier/Formatter"
+                storeIcon:
+                  type: string
+                  format: binary
+      responses:
+        '204':
+          description: update success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /user/login:
+    post:
+      summary: Login
+      tags:
+        - member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNTc5NDQ0NTA2LCJpYXQiOjE1NzkzNTgxMDZ9.fZgvJbHxxeT0CRxKgmksUP82aX91kh-5n3BPmVJ8sZ8"
+  /user/update-password:
+    put:
+      summary: Update password
+      tags:
+        - member
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        '204':
+          description: update success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /user/update-profile:
+    put:
+      summary: Update profile
+      tags:
+        - member
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '204':
+          description: update success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /packages:
+    get:
+      summary: List your packages
+      tags:
+        - packages
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: update success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    packageId:
+                      type: string
+                      example: "Vn"
+                    version:
+                      type: string
+                      example: "v20200119.145730"
+                    packageName:
+                      type: string
+                      example: "Beautifier/Formatter"
+                    iconUrl:
+                      type: string
+                      example: "http://dn-api-example.com/package-Vn-icon.png"
+                    description:
+                      type: string
+                      example: "Some code beautify tool"
+                    status:
+                      type: string
+                      example: "published"
+    post:
+      summary: Create a new package
+      tags:
+        - packages
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Beautifier/Formatter"
+                description:
+                  type: string
+                  example: "Some code beautify tool"
+                packageFile:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: update success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  packageId:
+                    type: string
+                    example: "7Z1"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /packages/{id}:
+    put:
+      summary: Update the package
+      tags:
+        - packages
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The package ID
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Beautifier/Formatter"
+                description:
+                  type: string
+                  example: "Some code beautify tool"
+                packageFile:
+                  type: string
+                  format: binary
+      responses:
+        '204':
+          description: update success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      summary: Update the package
+      tags:
+        - packages
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The package ID
+      responses:
+        '204':
+          description: delete success
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid

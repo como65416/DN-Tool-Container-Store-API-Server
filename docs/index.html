@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="myDomId"></div>
+  	<script>
+      const DisableTryItOutPlugin = function() {
+        return {
+          statePlugins: {
+            spec: {
+              wrapSelectors: {
+                allowTryItOutFor: () => () => false
+              }
+            }
+          }
+        }
+      }
+
+      SwaggerUIBundle ({
+        url: "api-doc.yml",
+        dom_id: '#myDomId',
+        readOnly : true,
+        validatorUrl: null,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIBundle.SwaggerUIStandalonePreset,
+          DisableTryItOutPlugin
+        ],
+      })
+  	</script>
+  </body>
+</html>
