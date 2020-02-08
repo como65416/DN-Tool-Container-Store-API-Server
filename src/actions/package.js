@@ -6,12 +6,13 @@ const encoder = require('../libs/encoder.js');
 const packageZipService = require('../services/packageZip.js');
 const path = require('path');
 const environment = require('../services/environment.js')
+const store = require('../services/store.js')
 
 async function listPackages(req, res) {
-  let dbQuery = database.getQuery();
+  let query = database.getQuery();
   let baseUrl = req.protocol + "://" + req.headers.host;
   let username = res.locals.username;
-  let packages = await dbQuery.table('package')
+  let packages = await query.table('package')
     .where('publish_username', '=', username);
 
   let myPackages = packages.map(p => {
@@ -42,43 +43,50 @@ async function addNewPackage(req, res) {
   let description = req.body.description;
   let packageFile = (req.files != null) ? req.files.packageFile : null;
 
-  let dbQuery = database.getQuery();
-  let packageId = (await dbQuery.table('package')
-    .insert({
+  let query = database.getQuery();
+  let trx = await query.transaction();
+  let packageId = null;
+  try {
+    packageId = await store.addNewPackage(trx, {
       name: packageName,
-      version: 'v' + dateFormat('yyyymmdd.HHMMss'),
+      version: dateFormat('yyyymmdd.HHMMss'),
       publish_username: username,
       description: description,
       status: 'published',
-    }))[0];
+    });
 
-  // extract icon from package zip
-  let iconDirPath = environment.getIconFolderPath();
-  let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
-  let iconInfo = await packageZipService.extractPackageIcon(packageFile.tempFilePath, iconDirPath + "/" + iconSaveFilename)
-  if (iconInfo == null) {
-    iconSaveFilename = '';
-  }
+    // extract icon from package zip
+    let iconDirPath = environment.getIconFolderPath();
+    let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
+    let iconInfo = await packageZipService.extractPackageIcon(packageFile.tempFilePath, iconDirPath + "/" + iconSaveFilename)
+    if (iconInfo == null) {
+      iconSaveFilename = '';
+    }
 
-  // update zip manifest.json config
-  await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, {
-    'packageId': encoder.encode(packageId.toString()),
-    description,
-    packageName
-  });
+    // update zip manifest.json config
+    await packageZipService.updatePackageManifestConfig(packageFile.tempFilePath, {
+      'packageId': encoder.encode(packageId.toString()),
+      description,
+      packageName
+    });
 
-  // move zip to package dir
-  let packageDirPath = environment.getPackageFolderPath();
-  let savePackageName = packageId + '-' + uniqid() + ".zip";
-  packageFile.mv(packageDirPath + savePackageName);
+    // move zip to package dir
+    let packageDirPath = environment.getPackageFolderPath();
+    let savePackageName = packageId + '-' + uniqid() + ".zip";
+    packageFile.mv(packageDirPath + savePackageName);
 
-  // update file information in database
-  await dbQuery.table('package')
-    .where('id', '=', packageId)
-    .update({
+    // update file information in database
+    await store.updatePackageData(trx, packageId, {
       icon_filename: iconSaveFilename,
       package_filename: savePackageName
     });
+
+    await trx.commit();
+  } catch (e) {
+    await trx.rollback();
+    console.log(e);
+    throw e;
+  }
 
   res.status(201).send({
     packageId: encoder.encode(packageId)
@@ -98,8 +106,8 @@ async function updatePackage(req, res) {
   let packageName = req.body.name;
   let description = req.body.description;
   let packageFile = (req.files != null) ? req.files.packageFile : null;
-  let dbQuery = database.getQuery();
-  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+  let query = database.getQuery();
+  let package = await query.table('package').where('id', '=', packageId).first();
 
   if (package == null || package.publish_username != username) {
     res.status(401).send({'message': 'Unauthorized'});
@@ -140,9 +148,7 @@ async function updatePackage(req, res) {
 
   // update information in database
   if (Object.keys(databaseUpdateDatas).length > 0) {
-    await dbQuery.table('package')
-      .where('id', '=', packageId)
-      .update(databaseUpdateDatas);
+    await store.updatePackageData(query, packageId, databaseUpdateDatas);
   }
 
   res.status(204).send('')
@@ -155,8 +161,8 @@ async function updatePackage(req, res) {
 async function deletePackage(req, res) {
   let packageId = encoder.decode(req.params.id) || 0;
   let username = res.locals.username;
-  let dbQuery = database.getQuery();
-  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+  let query = database.getQuery();
+  let package = await query.table('package').where('id', '=', packageId).first();
 
   if (package == null || package.publish_username != username) {
     res.status(401).send({'message': 'Unauthorized'});
@@ -176,15 +182,15 @@ async function deletePackage(req, res) {
   }
 
   // delete from database
-  await dbQuery.table('package').where('id', '=', packageId).delete();
+  await query.table('package').where('id', '=', packageId).delete();
 
   res.status(204).send('')
 }
 
 async function getPackageIcon(req, res) {
   let packageId = encoder.decode(req.params.id) || 0 ;
-  let dbQuery = database.getQuery();
-  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+  let query = database.getQuery();
+  let package = await query.table('package').where('id', '=', packageId).first();
 
   if (package == null) {
     res.status(404).send('Not found');
@@ -201,8 +207,8 @@ async function getPackageIcon(req, res) {
 
 async function downloadPackage(req, res) {
   let packageId = encoder.decode(req.params.id) || 0 ;
-  let dbQuery = database.getQuery();
-  let package = await dbQuery.table('package').where('id', '=', packageId).first();
+  let query = database.getQuery();
+  let package = await query.table('package').where('id', '=', packageId).first();
 
   let packageDirPath = environment.getPackageFolderPath();
   if (package == null && !fs.existsSync(packageDirPath + package.package_filename)) {

@@ -5,29 +5,30 @@ const environment = require('../services/environment.js')
 const path = require('path');
 
 async function getIcon(req, res) {
-  let iconPath = await storeService.getStoreIconPath();
+  let query = database.getQuery();
+  let iconPath = await storeService.getStoreIconPath(query);
 
   res.status(200).sendFile(path.resolve(iconPath));
 }
 
 async function updateStoreInfo(req, res) {
-  let dbQuery = database.getQuery();
+  let query = database.getQuery();
   let storeName = req.body.storeName;
   let storeIcon = (req.files != null) ? req.files.storeIcon : null;
 
   if (storeName != null) {
-    await dbQuery.table('store_option')
+    await query.table('store_option')
       .where('option_name', '=', 'store_name')
       .update({'option_value': storeName});
   }
   if (storeIcon != null) {
-    let storeOption = await dbQuery.table('store_option')
+    let storeOption = await query.table('store_option')
       .where('option_name', '=', 'icon_filename');
     let originIconPath = storeOption.option_value;
     let iconSavePath = originIconPath || 'store-icon.jpg';
     storeIcon.mv(environment.getStoragePath() + iconSavePath);
 
-    await dbQuery.table('store_option')
+    await query.table('store_option')
       .where('option_name', '=', 'icon_filename')
       .update({'option_value': iconSavePath});
   }
@@ -55,7 +56,7 @@ async function listStorePackage(req, res) {
       description: p.description,
       downloadUrl: baseUrl + "/packages/" + encodedPackageId + "/download",
     }
-  })
+  });
 
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send({

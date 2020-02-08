@@ -11,8 +11,9 @@ async function login(req, res) {
   res.setHeader('Content-Type', 'application/json');
   let username = req.body.username;
   let password = req.body.password;
+  let query = database.getQuery();
 
-  if (await accountService.checkAccountPassword(username, password)) {
+  if (await accountService.checkAccountPassword(query, username, password)) {
     let jwt_key = process.env.JWT_KEY;
 
     let payload = {
@@ -38,6 +39,7 @@ async function login(req, res) {
 async function updatePassword(req, res) {
   let username = res.locals.username;
   let password = req.body.password;
+  let query = database.getQuery();
 
   if (password == null || password.length < 8) {
     res.setHeader('Content-Type', 'application/json');
@@ -45,8 +47,15 @@ async function updatePassword(req, res) {
     return;
   }
 
-  let hashed_password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-  await accountService.updateAccountData(username, {password: hashed_password});
+  const trx = await query.transaction();
+  try {
+    let hashed_password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+    await accountService.updateAccountData(trx, username, {password: hashed_password});
+    await trx.commit();
+  } catch (e) {
+    await trx.rollback();
+    throw e;
+  }
 
   res.setHeader('Content-Type', 'application/json');
   res.status(204).send('');
@@ -59,13 +68,21 @@ async function updatePassword(req, res) {
 async function updateProfile(req, res) {
   let username = res.locals.username;
   let name = req.body.name;
+  let query = database.getQuery();
 
   if (name == null || name.length < 1) {
     res.setHeader('Content-Type', 'application/json');
     res.status(400).send({message: 'name needs to be at least 1 characters'});
   }
 
-  await accountService.updateAccountData(username, {name});
+  const trx = await query.transaction();
+  try {
+    await accountService.updateAccountData(trx, username, {name});
+    await trx.commit();
+  } catch (e) {
+    await trx.rollback();
+    throw e;
+  }
 
   res.setHeader('Content-Type', 'application/json');
   res.status(204).send('');

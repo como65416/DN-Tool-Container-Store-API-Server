@@ -1,9 +1,12 @@
-const database = require('../services/database.js');
 const bcrypt = require('bcrypt');
 
-async function checkAccountPassword(username, password) {
-  let dbQuery = database.getQuery();
-  let accountData = await dbQuery.table('account')
+/**
+ * @param  {Object} query knex object or knex transaction
+ * @param  {String} username
+ * @param  {String} password
+ */
+async function checkAccountPassword(query, username, password) {
+  let accountData = await query.table('account')
     .where('username', '=', username)
     .first();
 
@@ -11,12 +14,12 @@ async function checkAccountPassword(username, password) {
 }
 
 /**
+ * @param  {Object} knex object or knex transaction
  * @param  {String} username
  * @param  {Object} data
  */
-async function updateAccountData(username, data) {
-  let dbQuery = database.getQuery();
-  await dbQuery.table('account')
+async function updateAccountData(query, username, data) {
+  await query.table('account')
     .where('username', '=', username)
     .update(data);
 }
