@@ -1,6 +1,6 @@
 # DN Tool Container Store API Server
 
-I's used for manage personal [DN-Tool-Container](https://github.com/como65416/DnToolContainer) package store (only API).
+It's used for manage personal [DN-Tool-Container](https://github.com/como65416/DnToolContainer) package store (only API).
 
 ※ API document: [Link](https://como65416.github.io/DN-Tool-Container-Store-API-Server/)
 
