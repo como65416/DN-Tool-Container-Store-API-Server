@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
-const database = require('./src/libs/database.js');
+const database = require('./src/services/database.js');
 const databaseInstaller = require('./src/installers/databaseInstaller.js');
 const cryptoRandomString = require('crypto-random-string');
 const inquirer = require('inquirer');

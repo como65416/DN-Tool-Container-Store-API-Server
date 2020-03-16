@@ -25,7 +25,7 @@ let table_schemas = {
   store_option: (t) => {
     t.increments('id').primary();
     t.string('option_name', 20);
-    t.string('option_value', 30);
+    t.string('option_value', 100);
   }
 }
 
