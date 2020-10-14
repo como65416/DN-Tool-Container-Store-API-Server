@@ -240,7 +240,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     delete:
-      summary: Update the package
+      summary: Delete the package
       tags:
         - packages
       security:
