@@ -13,6 +13,7 @@ const listStorePackage = require('./actions/store').listStorePackage;
 const updateStoreInfo = require('./actions/store').updateStoreInfo;
 const getStoreIcon = require('./actions/store').getIcon;
 const checkJWTMiddleware = require('./middlewares/jwt-middleware').checkJWTMiddleware;
+const checkPackagePermission = require('./middlewares/permission-middleware').checkPackagePermission;
 
 router.get('/store/packages', listStorePackage);
 router.get('/store/icon', getStoreIcon);
@@ -24,7 +25,7 @@ router.put('/user/update-password', [checkJWTMiddleware], updatePassword);
 router.put('/user/update-profile', [checkJWTMiddleware], updateProfile);
 router.get('/packages', [checkJWTMiddleware], listPackages);
 router.post('/packages', [checkJWTMiddleware], addNewPackage);
-router.put('/packages/:id', [checkJWTMiddleware], updatePackage);
-router.delete('/packages/:id', [checkJWTMiddleware], deletePackage);
+router.put('/packages/:id', [checkJWTMiddleware, checkPackagePermission], updatePackage);
+router.delete('/packages/:id', [checkJWTMiddleware, checkPackagePermission], deletePackage);
 
 module.exports = router;

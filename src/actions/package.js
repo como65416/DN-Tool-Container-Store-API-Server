@@ -1,22 +1,16 @@
-const database = require('../services/database.js');
-const dateFormat = require('dateformat');
 const encoder = require('../libs/encoder.js');
-const environment = require('../services/environment.js');
 const fs = require('fs');
 const packageService = require('../services/package.js');
-const path = require('path');
 const store = require('../services/store.js');
-const uniqid = require('uniqid');
 
 async function listPackages(req, res) {
-  let query = database.getQuery();
   let baseUrl = req.protocol + "://" + req.headers.host;
   let username = res.locals.username;
-  let packages = await query.table('package')
-    .where('publish_username', '=', username);
+  let packages = await packageService.getUserPackages(username);
 
-  let myPackages = packages.map(p => {
-    let encodedPackageId = encoder.encode(p.id.toString())
+  packages = packages.map(p => {
+    let encodedPackageId = encoder.encode(p.id.toString());
+
     return {
       packageId: encodedPackageId,
       packageName: p.name,
@@ -27,8 +21,7 @@ async function listPackages(req, res) {
     }
   })
 
-  res.setHeader('Content-Type', 'application/json');
-  res.status(200).send(myPackages);
+  return res.status(200).json(packages).end();
 }
 
 /**
@@ -39,53 +32,14 @@ async function listPackages(req, res) {
  */
 async function addNewPackage(req, res) {
   let username = res.locals.username;
-  let packageName = req.body.name;
+  let name = req.body.name;
   let description = req.body.description;
-  let packageFile = (req.files != null) ? req.files.packageFile : null;
+  let packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
 
-  let query = database.getQuery();
-  let trx = await query.transaction();
-  let packageId = null;
-  try {
-    packageId = await store.addNewPackage(trx, {
-      name: packageName,
-      version: dateFormat('yyyymmdd.HHMMss'),
-      publish_username: username,
-      description: description,
-      status: 'published',
-    });
+  let packageId = await packageService.createPackage(username, {name, description}, packageFilePath);
 
-    // extract icon from package zip
-    let iconDirPath = environment.getIconFolderPath();
-    let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
-    let iconInfo = await packageService.extractZipIcon(packageFile.tempFilePath, iconDirPath + "/" + iconSaveFilename)
-    if (iconInfo == null) {
-      iconSaveFilename = '';
-    }
-
-    // update zip manifest.json config
-    await packageService.updateZipManifestConfig(packageFile.tempFilePath, {
-      'packageId': encoder.encode(packageId.toString()),
-      description,
-      packageName
-    });
-
-    // move zip to package dir
-    let packageDirPath = environment.getPackageFolderPath();
-    let savePackageName = packageId + '-' + uniqid() + ".zip";
-    packageFile.mv(packageDirPath + savePackageName);
-
-    // update file information in database
-    await store.updatePackageData(trx, packageId, {
-      icon_filename: iconSaveFilename,
-      package_filename: savePackageName
-    });
-
-    await trx.commit();
-  } catch (e) {
-    await trx.rollback();
-    console.log(e);
-    throw e;
+  if (packageFilePath != null) {
+    fs.unlinkSync(packageFilePath);
   }
 
   res.status(201).send({
@@ -101,54 +55,15 @@ async function addNewPackage(req, res) {
  * @apiParam  {File}   packageFile   package file zip
  */
 async function updatePackage(req, res) {
-  let packageId = encoder.decode(req.params.id) || 0 ;
-  let username = res.locals.username;
-  let packageName = req.body.name;
+  let packageId = encoder.decode(req.params.id)[0] || 0 ;
+  let name = req.body.name;
   let description = req.body.description;
-  let packageFile = (req.files != null) ? req.files.packageFile : null;
-  let query = database.getQuery();
-  let package = await query.table('package').where('id', '=', packageId).first();
+  let packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
 
-  if (package == null || package.publish_username != username) {
-    res.status(401).send({'message': 'Unauthorized'});
-    return;
-  }
+  await packageService.updatePackage(packageId, {name, description}, packageFilePath);
 
-  let databaseUpdateDatas = {};
-  let manifestUpdateDatas = {};
-  Object.assign(databaseUpdateDatas, (description != null) ? {description} : {});
-  Object.assign(databaseUpdateDatas, (packageName != null) ? {'name': packageName} : {});
-  Object.assign(manifestUpdateDatas, (description != null) ? {description} : {});
-  Object.assign(manifestUpdateDatas, (packageName != null) ? {'packageName': packageName} : {});
-
-  let packageDirPath = environment.getPackageFolderPath();
-  if (packageFile != null) {
-    // update version
-    let version = 'v' + dateFormat('yyyymmdd.HHMMss');
-    Object.assign(databaseUpdateDatas, {'version': version});
-    Object.assign(manifestUpdateDatas, {'version': version});
-    Object.assign(manifestUpdateDatas, {'packageId': encoder.encode(packageId)});
-
-    // extract icon file from package zip
-    let iconDirPath = environment.getIconFolderPath();
-    if (package.icon_filename != null && package.icon_filename != '' && fs.existsSync(iconDirPath + package.icon_filename)) {
-      fs.unlinkSync(iconDirPath + package.icon_filename);
-    }
-    let iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
-    let iconInfo = await packageService.extractZipIcon(packageFile.tempFilePath, iconDirPath + "/" + iconSaveFilename);
-    Object.assign(databaseUpdateDatas, {'icon_filename': (iconInfo != null) ? iconSaveFilename : ''});
-
-    // update manifest information (new zip)
-    await packageService.updateZipManifestConfig(packageFile.tempFilePath, manifestUpdateDatas);
-    packageFile.mv(packageDirPath + package.package_filename);
-  } else {
-    // update manifest information (old zip)
-    await packageService.updateZipManifestConfig(packageDirPath + package.package_filename, manifestUpdateDatas);
-  }
-
-  // update information in database
-  if (Object.keys(databaseUpdateDatas).length > 0) {
-    await store.updatePackageData(query, packageId, databaseUpdateDatas);
+  if (packageFilePath != null) {
+    fs.unlinkSync(packageFilePath);
   }
 
   res.status(204).send('')
@@ -160,63 +75,32 @@ async function updatePackage(req, res) {
  */
 async function deletePackage(req, res) {
   let packageId = encoder.decode(req.params.id) || 0;
-  let username = res.locals.username;
-  let query = database.getQuery();
-  let package = await query.table('package').where('id', '=', packageId).first();
 
-  if (package == null || package.publish_username != username) {
-    res.status(401).send({'message': 'Unauthorized'});
-    return;
-  }
-
-  // delete icon
-  let iconDirPath = environment.getIconFolderPath();
-  if (package.icon_filename != null && package.icon_filename != '' && fs.existsSync(iconDirPath + package.icon_filename)) {
-    fs.unlinkSync(iconDirPath + package.icon_filename);
-  }
-
-  // delete icon
-  let packageDirPath = environment.getPackageFolderPath();
-  if (package.package_filename != null && package.package_filename != '' && fs.existsSync(packageDirPath + package.package_filename)) {
-    fs.unlinkSync(packageDirPath + package.package_filename);
-  }
-
-  // delete from database
-  await query.table('package').where('id', '=', packageId).delete();
+  await packageService.deletePackage(packageId);
 
   res.status(204).send('')
 }
 
 async function getPackageIcon(req, res) {
   let packageId = encoder.decode(req.params.id) || 0 ;
-  let query = database.getQuery();
-  let package = await query.table('package').where('id', '=', packageId).first();
+  let iconFilePath = await packageService.getPackageIconPath(packageId);
 
-  if (package == null) {
-    res.status(404).send('Not found');
-    return;
+  if (iconFilePath == null) {
+    return res.status(404).send('Not found').end();
   }
 
-  let iconDirPath = environment.getIconFolderPath();
-  if (fs.existsSync(iconDirPath + package.icon_filename)) {
-    res.status(200).sendFile(path.resolve(iconDirPath + package.icon_filename));
-    return;
-  }
-  res.status(200).sendFile(path.resolve(environment.getDefaultIconPath()));
+  res.status(200).sendFile(iconFilePath);
 }
 
 async function downloadPackage(req, res) {
   let packageId = encoder.decode(req.params.id) || 0 ;
-  let query = database.getQuery();
-  let package = await query.table('package').where('id', '=', packageId).first();
+  let packageFilePath = await packageService.getPackageZipPath(packageId);
 
-  let packageDirPath = environment.getPackageFolderPath();
-  if (package == null && !fs.existsSync(packageDirPath + package.package_filename)) {
-    res.status(404).send('Not found');
-    return;
+  if (packageFilePath == null) {
+    return res.status(404).send('Not found').end();
   }
 
-  res.status(200).download(path.resolve(packageDirPath + package.package_filename), 'package.zip');
+  res.status(200).sendFile(packageFilePath);
 }
 
 module.exports = {
