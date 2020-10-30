@@ -1,29 +1,21 @@
 const accountService = require('../services/account.js');
-const jwt = require('jsonwebtoken');
+const jwtService = require('../services/jwt.js');
 
 /**
  * @apiParam {String} username User account username.
  * @apiParam {String} password User password.
  */
 async function login(req, res) {
-  res.setHeader('Content-Type', 'application/json');
   let username = req.body.username;
   let password = req.body.password;
 
   if (await accountService.checkAccountPassword(username, password)) {
-    let jwt_key = process.env.JWT_KEY;
+    let token = jwtService.generateToken({username}, 86400);
 
-    let payload = {
-      username: username,
-      exp: parseInt((new Date()).getTime() / 1000) + 86400
-    };
-    let token = jwt.sign(payload, jwt_key);
-
-    res.status(200).send({token})
-    return;
+    return res.status(200).json({token}).end();
   }
 
-  res.status(401).send({'message': 'login fail'});
+  res.status(401).json({'message': 'login fail'}).end();
 }
 
 /**
@@ -35,14 +27,11 @@ async function updatePassword(req, res) {
   let password = req.body.password;
 
   if (password == null || password.length < 8) {
-    res.setHeader('Content-Type', 'application/json');
-    res.status(400).send({message: 'password needs to be at least 8 characters'});
-    return;
+    return res.status(400).json({message: 'password needs to be at least 8 characters'}).end();
   }
 
   await accountService.updateAccountData(username, {password});
 
-  res.setHeader('Content-Type', 'application/json');
   res.status(204).send('');
 }
 
@@ -55,14 +44,12 @@ async function updateProfile(req, res) {
   let name = req.body.name;
 
   if (name == null || name.length < 1) {
-    res.setHeader('Content-Type', 'application/json');
-    res.status(400).send({message: 'name needs to be at least 1 characters'});
+    return res.status(400).json({message: 'name needs to be at least 1 characters'}).end();
   }
 
   await accountService.updateAccountData(username, {name});
 
-  res.setHeader('Content-Type', 'application/json');
-  res.status(204).send('');
+  res.status(204).send('').end();
 }
 
 module.exports = {

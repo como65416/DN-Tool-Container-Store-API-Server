@@ -1,26 +1,21 @@
-const jwt = require('jsonwebtoken');
+const jwtService = require('../services/jwt.js');
 
 function checkJWTMiddleware(req, res, next) {
   try {
     let authorization = req.header('Authorization');
-    let match = authorization.match(/^Bearer +(.*?)$/);
-    let jwt_key = process.env.JWT_KEY;
-    let payload = jwt.verify(match[1], jwt_key);
+    let token = authorization.match(/^Bearer +(.*?)$/)[1];
+    let data = jwtService.extractTokenData(token);
 
-    if (payload.exp > parseInt((new Date()).getTime() / 1000)) {
-      Object.assign(res.locals, {
-        username: payload.username,
-      });
-      next();
-      return;
-    }
+    Object.assign(res.locals, {
+      username: data.username,
+    });
   } catch (e) {
-    // do nothing
+    return res.status(401).send('token not valid').end();
   }
 
-  res.status(401).send('token not valid');
+  next();
 }
 
 module.exports = {
-  checkJWTMiddleware
+  checkJWTMiddleware,
 }
