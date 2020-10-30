@@ -7,8 +7,9 @@ const environment = require('../services/environment.js')
  * @param  {String} packagePath  package zip path
  * @return {Object}              package manifest config
  */
-async function readPackageManifestConfig(packagePath) {
+async function readZipManifestConfig(packagePath) {
   let zip = new AdmZip(packagePath);
+
   return JSON.parse(zip.readAsText("dn-manifest.json"));
 }
 
@@ -17,9 +18,9 @@ async function readPackageManifestConfig(packagePath) {
  * @param  {String} iconSavePath extract icon save path
  * @return {Object|null}         image information (if no icon in packages return null)
  */
-async function extractPackageIcon(packagePath, iconSavePath) {
+async function extractZipIcon(packagePath, iconSavePath) {
   let tmpDirPath = environment.getTempFolderPath();
-  let manifestConfig = await readPackageManifestConfig(packagePath);
+  let manifestConfig = await readZipManifestConfig(packagePath);
   let iconFilePath = manifestConfig.iconFile;
   if (iconFilePath == null || iconFilePath == '') {
     return null;
@@ -42,8 +43,8 @@ async function extractPackageIcon(packagePath, iconSavePath) {
  * @param  {String} packagePath package zip path
  * @param  {Object} updateData  update manifest config data
  */
-async function updatePackageManifestConfig(packagePath, updateData) {
-  let mainfestConfig = await readPackageManifestConfig(packagePath);
+async function updateZipManifestConfig(packagePath, updateData) {
+  let mainfestConfig = await readZipManifestConfig(packagePath);
   Object.assign(mainfestConfig, updateData);
   let zip = new AdmZip(packagePath);
   let newContent = JSON.stringify(mainfestConfig, null, 2);
@@ -53,7 +54,7 @@ async function updatePackageManifestConfig(packagePath, updateData) {
 }
 
 module.exports = {
-  readPackageManifestConfig,
-  extractPackageIcon,
-  updatePackageManifestConfig
+  readZipManifestConfig,
+  extractZipIcon,
+  updateZipManifestConfig
 }
