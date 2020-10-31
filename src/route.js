@@ -1,31 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const login = require('./actions/member').login;
-const updatePassword = require('./actions/member').updatePassword;
-const updateProfile = require('./actions/member').updateProfile;
-const addNewPackage = require('./actions/package').addNewPackage;
-const updatePackage = require('./actions/package').updatePackage;
-const deletePackage = require('./actions/package').deletePackage;
-const listPackages = require('./actions/package').listPackages;
-const downloadPackage = require('./actions/package').downloadPackage;
-const getPackageIcon = require('./actions/package').getPackageIcon;
-const listStorePackage = require('./actions/store').listStorePackage;
-const updateStoreInfo = require('./actions/store').updateStoreInfo;
-const getStoreIcon = require('./actions/store').getIcon;
+const memberController = require('./controllers/member');
+const packageController = require('./controllers/package');
+const storeController = require('./controllers/store');
 const checkJWTMiddleware = require('./middlewares/jwt-middleware').checkJWTMiddleware;
-const checkPackagePermission = require('./middlewares/permission-middleware').checkPackagePermission;
+const packagePermissionMiddleware = require('./middlewares/permission-middleware').checkPackagePermission;
 
-router.get('/store/packages', listStorePackage);
-router.get('/store/icon', getStoreIcon);
-router.put('/store/info', updateStoreInfo);
-router.get('/packages/:id/icon', getPackageIcon);
-router.get('/packages/:id/download', downloadPackage);
-router.post('/user/login', login);
-router.put('/user/update-password', [checkJWTMiddleware], updatePassword);
-router.put('/user/update-profile', [checkJWTMiddleware], updateProfile);
-router.get('/packages', [checkJWTMiddleware], listPackages);
-router.post('/packages', [checkJWTMiddleware], addNewPackage);
-router.put('/packages/:id', [checkJWTMiddleware, checkPackagePermission], updatePackage);
-router.delete('/packages/:id', [checkJWTMiddleware, checkPackagePermission], deletePackage);
+router.get('/store/packages', storeController.listStorePackage);
+router.get('/store/icon', storeController.getIcon);
+router.put('/store/info', [checkJWTMiddleware], storeController.updateStoreInfo);
+
+router.post('/user/login', memberController.login);
+router.put('/user/update-password', [checkJWTMiddleware], memberController.updatePassword);
+router.put('/user/update-profile', [checkJWTMiddleware], memberController.updateProfile);
+
+router.get('/packages/:id/icon', packageController.getPackageIcon);
+router.get('/packages/:id/download', packageController.downloadPackage);
+router.get('/packages', [checkJWTMiddleware], packageController.listPackages);
+router.post('/packages', [checkJWTMiddleware], packageController.addNewPackage);
+router.put('/packages/:id', [checkJWTMiddleware, packagePermissionMiddleware], packageController.updatePackage);
+router.delete('/packages/:id', [checkJWTMiddleware, packagePermissionMiddleware], packageController.deletePackage);
 
 module.exports = router;
