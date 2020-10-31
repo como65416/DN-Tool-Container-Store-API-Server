@@ -1,4 +1,4 @@
-const database = require('../services/database.js');
+const StoreOption = require('../models').StoreOption;
 const environment = require('../services/environment.js');
 const fs = require('fs');
 const path = require('path');
@@ -7,13 +7,14 @@ const path = require('path');
  * @return {Object} store infomation
  */
 async function getStoreInfo() {
-  let query = database.getQuery();
-  let storeOption = await query.table('store_option')
-    .where('option_name', '=', 'store_name')
-    .first();
+  let storeOption = await StoreOption.findOne({
+    where: {
+      'option_name': 'store_name',
+    }
+  });
 
   return {
-    'name': storeOption.option_name
+    'name': storeOption.option_value
   }
 }
 
@@ -22,10 +23,11 @@ async function getStoreInfo() {
  * @return {String|null}
  */
 async function getStoreIconPath() {
-  let query = database.getQuery();
-  let storeOption = await query.table('store_option')
-    .where('option_name', '=', 'icon_filename')
-    .first();
+  let storeOption = await StoreOption.findOne({
+    where: {
+      'option_name': 'icon_filename',
+    }
+  });
 
   let iconPath = environment.getDefaultStoreIconPath();
   if (storeOption != null && storeOption.option_value != '') {
@@ -40,24 +42,28 @@ async function getStoreIconPath() {
  * @param  {String} iconFilePath
  */
 async function updateStoreInfo(info, iconFilePath) {
-  let query = database.getQuery();
-
   if (info.name != null) {
-    await query.table('store_option')
-      .where('option_name', '=', 'store_name')
-      .update({'option_value': info.name});
+    let storeOption = await StoreOption.findOne({
+      where: {
+        'option_name': 'store_name',
+      }
+    });
+    storeOption.option_value = info.name;
+    await storeOption.save();
   }
 
   if (iconFilePath != null) {
-    let storeOption = await query.table('store_option')
-      .where('option_name', '=', 'icon_filename');
+    let storeOption = await StoreOption.findOne({
+      where: {
+        'option_name': 'icon_filename',
+      }
+    });
     let originIconPath = storeOption.option_value;
     let iconSavePath = originIconPath || 'store-icon.jpg';
     fs.copyFileSync(iconFilePath, environment.getStoreFolderPath() + iconSavePath);
 
-    await query.table('store_option')
-      .where('option_name', '=', 'icon_filename')
-      .update({'option_value': iconSavePath});
+    storeOption.option_value = iconSavePath;
+    await storeOption.save();
   }
 }
 

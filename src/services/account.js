@@ -1,5 +1,5 @@
+const Account = require('../models').Account;
 const bcrypt = require('bcrypt');
-const database = require('../services/database.js');
 
 /**
  * @param  {Object} query knex object or knex transaction
@@ -7,12 +7,13 @@ const database = require('../services/database.js');
  * @param  {String} password
  */
 async function checkAccountPassword(username, password) {
-  let query = database.getQuery();
-  let accountData = await query.table('account')
-    .where('username', '=', username)
-    .first();
+  let account = await Account.findOne({
+    where: {
+      'username': username,
+    }
+  });
 
-  return bcrypt.compareSync(password, accountData.password);
+  return bcrypt.compareSync(password, account.password);
 }
 
 /**
@@ -21,14 +22,18 @@ async function checkAccountPassword(username, password) {
  * @param  {Object} data
  */
 async function updateAccountData(username, data) {
+  let account = await Account.findOne({
+    where: {
+      'username': username,
+    }
+  });
+
   if (data.password != null) {
-    data.password = bcrypt.hashSync(data.password, bcrypt.genSaltSync(10));
+    account.password = bcrypt.hashSync(data.password, bcrypt.genSaltSync(10));
   }
 
-  let query = database.getQuery();
-  await query.table('account')
-    .where('username', '=', username)
-    .update(data);
+  account.name = data.name || account.name;
+  await account.save();
 }
 
 module.exports = {
