@@ -1,9 +1,9 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
-const database = require('./src/services/database.js');
 const databaseInstaller = require('./src/installers/databaseInstaller.js');
 const cryptoRandomString = require('crypto-random-string');
 const inquirer = require('inquirer');
+const { Sequelize } = require('sequelize');
 
 inquirer.prompt([
   {
@@ -32,7 +32,7 @@ inquirer.prompt([
     message: 'CORS available domains:'
   }
 ])
-.then(answers => {
+.then(async (answers) => {
   let jwt_key = cryptoRandomString({length: 32, type: 'base64'});
   let crypto_key = cryptoRandomString({length: 32, type: 'base64'});
 
@@ -62,13 +62,18 @@ inquirer.prompt([
   dotenv.config({ path : '.env'});
 
   // init database
-  databaseInstaller.install()
-    .then(() => {
-      console.log('\x1b[32m%s\x1b[0m', 'Install database success.');
-    })
-    .catch((e) => {
-      console.log('\x1b[31m%s\x1b[0m', 'Install database fail :', e.message);
-    });
+  const sequelize = new Sequelize(answers.db_name, answers.db_account, answers.db_password, {
+    host: answers.db_ip,
+    dialect: 'mysql',
+    logging: false,
+  });
+  try {
+    await databaseInstaller.install(sequelize);
+    await sequelize.close();
+    console.log('\x1b[32m%s\x1b[0m', 'Install database success.');
+  } catch (e) {
+    console.log('\x1b[31m%s\x1b[0m', 'Install database fail :', e.message)
+  }
 })
 .catch(err => {
   console.log('input data error :', err);
