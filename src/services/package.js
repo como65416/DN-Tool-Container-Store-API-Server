@@ -8,6 +8,14 @@ const path = require('path');
 const storeService = require('../services/store.js');
 const uniqid = require('uniqid');
 
+async function getAllPublishedPackages() {
+  let query = database.getQuery();
+  let packages = await query.table('package')
+    .where('status', '=', 'published');
+
+  return packages;
+}
+
 /**
  * @param  {Integer} packageId
  * @return {Object}
@@ -246,6 +254,7 @@ async function updateZipManifestConfig(packagePath, updateData) {
 }
 
 module.exports = {
+  getAllPublishedPackages,
   getPackageInfo,
   getUserPackages,
   getPackageIconPath,
