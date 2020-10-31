@@ -10,7 +10,7 @@ function checkJWTMiddleware(req, res, next) {
       username: data.username,
     });
   } catch (e) {
-    return res.status(401).send('token not valid').end();
+    return res.status(401).json({message: 'token not valid'}).end();
   }
 
   next();
