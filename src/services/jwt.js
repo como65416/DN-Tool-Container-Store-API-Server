@@ -18,7 +18,7 @@ function extractTokenData(token) {
   let payload = jwt.verify(token, jwtKey);
 
   if (payload.exp < parseInt((new Date()).getTime() / 1000)) {
-    throw 'token is expired.';
+    throw new Error('token is expired.');
   }
 
   return payload.data;
