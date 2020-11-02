@@ -9,7 +9,7 @@ async function listPackages(req, res) {
   let packages = await packageService.getUserPackages(username);
 
   packages = packages.map(p => {
-    let encodedPackageId = encoder.encode(p.id.toString());
+    let encodedPackageId = encoder.encodeId(p.id.toString());
 
     return {
       packageId: encodedPackageId,
@@ -43,7 +43,7 @@ async function addNewPackage(req, res) {
   }
 
   res.status(201).send({
-    packageId: encoder.encode(packageId)
+    packageId: encoder.encodeId(packageId)
   })
 }
 
@@ -55,7 +55,7 @@ async function addNewPackage(req, res) {
  * @apiParam  {File}   packageFile   package file zip
  */
 async function updatePackage(req, res) {
-  let packageId = encoder.decode(req.params.id)[0] || 0 ;
+  let packageId = encoder.decodeId(req.params.id);
   let name = req.body.name;
   let description = req.body.description;
   let packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
@@ -74,7 +74,7 @@ async function updatePackage(req, res) {
  * @apiParam  {String} id            package id
  */
 async function deletePackage(req, res) {
-  let packageId = encoder.decode(req.params.id)[0] || 0;
+  let packageId = encoder.decodeId(req.params.id);
 
   await packageService.deletePackage(packageId);
 
@@ -82,7 +82,7 @@ async function deletePackage(req, res) {
 }
 
 async function getPackageIcon(req, res) {
-  let packageId = encoder.decode(req.params.id)[0] || 0 ;
+  let packageId = encoder.decodeId(req.params.id);
   let iconFilePath = await packageService.getPackageIconPath(packageId);
 
   if (iconFilePath == null) {
@@ -93,7 +93,7 @@ async function getPackageIcon(req, res) {
 }
 
 async function downloadPackage(req, res) {
-  let packageId = encoder.decode(req.params.id)[0] || 0 ;
+  let packageId = encoder.decodeId(req.params.id);
   let packageFilePath = await packageService.getPackageZipPath(packageId);
 
   if (packageFilePath == null) {

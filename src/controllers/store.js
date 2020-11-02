@@ -23,7 +23,7 @@ async function listStorePackage(req, res) {
   let packages = await packageService.getAllPublishedPackages();
 
   let storePackages = packages.map(p => {
-    let encodedPackageId = encoder.encode(p.id.toString());
+    let encodedPackageId = encoder.encodeId(p.id.toString());
 
     return {
       packageId: encodedPackageId,

@@ -3,7 +3,7 @@ const encoder = require('../libs/encoder');
 
 async function checkPackagePermission (req, res, next) {
   let username = res.locals.username;
-  let packageId = encoder.decode(req.params.id)[0] || 0 ;
+  let packageId = encoder.decodeId(req.params.id);
   let package = await packageService.getPackageInfo(packageId);
 
   if (package == null || package.publish_username != username) {

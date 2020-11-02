@@ -90,7 +90,7 @@ async function createPackage(username, packageInfo, filePath) {
 
     // update zip manifest.json config
     await updateZipManifestConfig(filePath, {
-      'packageId': encoder.encode(package.id.toString()),
+      'packageId': encoder.encodeId(package.id.toString()),
       'description': packageInfo.description,
       'packageName': packageInfo.name
     });
@@ -134,7 +134,7 @@ async function updatePackage(packageId, packageInfo, filePath) {
     // update version
     let version = 'v' + dateFormat('yyyymmdd.HHMMss');
     package.version = manifestUpdateDatas.version = version;
-    manifestUpdateDatas.packageId = encoder.encode(packageId);
+    manifestUpdateDatas.packageId = encoder.encodeId(packageId);
 
     // extract icon file from package zip
     let iconDirPath = environment.getIconFolderPath();
