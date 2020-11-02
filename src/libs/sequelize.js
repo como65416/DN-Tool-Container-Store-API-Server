@@ -1,9 +1,10 @@
 const { Sequelize } = require('sequelize');
+const config = require('../config');
 
-let host = process.env.DATABASE_HOST;
-let user = process.env.DATABASE_USERNAME;
-let password = process.env.DATABASE_PASSWORD;
-let database = process.env.DATABASE_NAME;
+let host = config.database.host;
+let user = config.database.username;
+let password = config.database.password;
+let database = config.database.name;
 
 const sequelize = new Sequelize(database, user, password, {
   host: host,

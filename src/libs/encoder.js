@@ -1,6 +1,7 @@
-const Hashids = require('hashids/cjs')
+const Hashids = require('hashids/cjs');
+const config = require('../config');
 
-const key = process.env.CRYPTO_KEY;
+const key = config.crypt.key;
 
 function encode($data) {
   let hashids = new Hashids(key);

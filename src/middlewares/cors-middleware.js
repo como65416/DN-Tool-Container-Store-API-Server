@@ -1,6 +1,7 @@
+const config = require('../config');
 
 function corsMiddleware (req, res, next) {
-  let availableDomains = process.env.AVAILABLE_DOMAINS.split(',') || [];
+  let availableDomains = config.cors.domains;
   let url = (req.get('origin')) ? new URL(req.get('origin')) : null;
 
   if (url != null && availableDomains.includes(url.host)) {
