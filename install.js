@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
-const databaseInstaller = require('./src/installers/databaseInstaller.js');
+const databaseInstaller = require('./src/installers/database-installer.js');
 const cryptoRandomString = require('crypto-random-string');
 const inquirer = require('inquirer');
 const { Sequelize } = require('sequelize');
