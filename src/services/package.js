@@ -1,11 +1,11 @@
 const AdmZip = require('adm-zip');
 const dateFormat = require('dateformat');
-const encoder = require('../libs/encoder.js');
-const environment = require('../services/environment.js');
+const encoder = require('../libs/encoder');
+const environment = require('../services/environment');
 const fs = require('fs');
 const path = require('path');
 const sequelize = require('../libs/sequelize');
-const storeService = require('../services/store.js');
+const storeService = require('../services/store');
 const uniqid = require('uniqid');
 const Package = require('../models').Package;
 

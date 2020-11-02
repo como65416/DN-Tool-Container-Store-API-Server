@@ -1,4 +1,4 @@
-const jwtService = require('../services/jwt.js');
+const jwtService = require('../services/jwt');
 
 function checkJWTMiddleware(req, res, next) {
   try {

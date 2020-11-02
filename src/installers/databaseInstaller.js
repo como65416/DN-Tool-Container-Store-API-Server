@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-const Account = require('../models/account.js');
-const Package = require('../models/package.js');
-const StoreOption = require('../models/store-option.js');
+const Account = require('../models/account');
+const Package = require('../models/package');
+const StoreOption = require('../models/store-option');
 
 async function install(sequelize) {
   await Account(sequelize).sync();

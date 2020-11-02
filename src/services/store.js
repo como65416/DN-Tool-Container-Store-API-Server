@@ -1,5 +1,5 @@
 const StoreOption = require('../models').StoreOption;
-const environment = require('../services/environment.js');
+const environment = require('../services/environment');
 const fs = require('fs');
 const path = require('path');
 

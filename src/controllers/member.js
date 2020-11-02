@@ -1,5 +1,5 @@
-const accountService = require('../services/account.js');
-const jwtService = require('../services/jwt.js');
+const accountService = require('../services/account');
+const jwtService = require('../services/jwt');
 
 /**
  * @apiParam {String} username User account username.

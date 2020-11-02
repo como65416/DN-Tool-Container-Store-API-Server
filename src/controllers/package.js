@@ -1,7 +1,7 @@
-const encoder = require('../libs/encoder.js');
+const encoder = require('../libs/encoder');
 const fs = require('fs');
-const packageService = require('../services/package.js');
-const store = require('../services/store.js');
+const packageService = require('../services/package');
+const store = require('../services/store');
 
 async function listPackages(req, res) {
   let baseUrl = req.protocol + "://" + req.headers.host;
