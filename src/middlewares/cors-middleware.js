@@ -20,6 +20,4 @@ function corsMiddleware (req, res, next) {
   next();
 }
 
-module.exports = {
-  corsMiddleware
-}
+module.exports = corsMiddleware;

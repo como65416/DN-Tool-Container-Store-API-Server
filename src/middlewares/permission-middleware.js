@@ -14,6 +14,4 @@ async function checkPackagePermission (req, res, next) {
   next();
 }
 
-module.exports = {
-  checkPackagePermission,
-}
+module.exports = checkPackagePermission;

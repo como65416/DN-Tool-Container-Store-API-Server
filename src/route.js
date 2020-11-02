@@ -1,10 +1,11 @@
 const express = require('express');
-const router = express.Router();
 const memberController = require('./controllers/member');
 const packageController = require('./controllers/package');
 const storeController = require('./controllers/store');
-const checkJWTMiddleware = require('./middlewares/jwt-middleware').checkJWTMiddleware;
-const packagePermissionMiddleware = require('./middlewares/permission-middleware').checkPackagePermission;
+const checkJWTMiddleware = require('./middlewares/jwt-middleware');
+const packagePermissionMiddleware = require('./middlewares/permission-middleware');
+
+const router = express.Router();
 
 router.get('/store/packages', storeController.listStorePackage);
 router.get('/store/icon', storeController.getIcon);

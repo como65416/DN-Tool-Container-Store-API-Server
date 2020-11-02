@@ -5,7 +5,7 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const route = require('./src/route');
 const bodyParser = require('body-parser');
-const corsMiddleware = require('./src/middlewares/cors-middleware').corsMiddleware;
+const corsMiddleware = require('./src/middlewares/cors-middleware');
 
 let app = express();
 

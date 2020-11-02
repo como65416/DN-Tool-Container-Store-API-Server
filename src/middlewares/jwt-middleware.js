@@ -16,6 +16,4 @@ function checkJWTMiddleware(req, res, next) {
   next();
 }
 
-module.exports = {
-  checkJWTMiddleware,
-}
+module.exports = checkJWTMiddleware;
