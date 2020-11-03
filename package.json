@@ -8,6 +8,7 @@
   "dependencies": {
     "adm-zip": "^0.4.13",
     "bcrypt": "^5.0.0",
+    "celebrate": "^13.0.3",
     "crypto-random-string": "^3.0.1",
     "dateformat": "^3.0.3",
     "dotenv": "^8.1.0",
