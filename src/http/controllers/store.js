@@ -1,6 +1,6 @@
-const encoder = require('../libs/encoder');
-const storeService = require('../services/store');
-const packageService = require('../services/package');
+const encoder = require('../../libs/encoder');
+const storeService = require('../../services/store');
+const packageService = require('../../services/package');
 
 async function getIcon(req, res) {
   let iconPath = await storeService.getStoreIconPath();

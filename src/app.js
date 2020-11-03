@@ -3,9 +3,9 @@ require('dotenv').config({ path : '.env'});
 
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const route = require('./src/route');
+const route = require('./http/route');
 const bodyParser = require('body-parser');
-const corsMiddleware = require('./src/middlewares/cors-middleware');
+const corsMiddleware = require('./http/middlewares/cors-middleware');
 
 let app = express();
 
@@ -33,4 +33,7 @@ app.use(function(err, req, res, next) {
 
 app.listen(3000, function () {
   console.log('app listening on port 3000!');
+}).on('error', err => {
+  console.log(err);
+  process.exit(1);
 });

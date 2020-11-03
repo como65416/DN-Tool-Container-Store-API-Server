@@ -1,5 +1,5 @@
-const packageService = require('../services/package');
-const encoder = require('../libs/encoder');
+const packageService = require('../../services/package');
+const encoder = require('../../libs/encoder');
 
 async function checkPackagePermission (req, res, next) {
   let username = res.locals.username;

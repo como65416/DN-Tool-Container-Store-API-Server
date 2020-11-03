@@ -24,11 +24,11 @@ node install.js
 ## Start Server
 
 ```
-node start-server.js
+npm run start
 ```
 
 ### Default Admin account
 
 | username | password |
-| --- | --- | 
+| --- | --- |
 | admin | admin |

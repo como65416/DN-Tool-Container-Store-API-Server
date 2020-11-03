@@ -1,4 +1,4 @@
-const config = require('../config');
+const config = require('../../config');
 
 function corsMiddleware (req, res, next) {
   let availableDomains = config.cors.domains;
