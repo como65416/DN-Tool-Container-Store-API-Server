@@ -2,7 +2,7 @@
   "name": "dn-tool-container-store-api-server",
   "scripts": {
     "install": "node src/install.js",
-    "start": "node src/app.js"
+    "start": "nodemon src/app.js"
   },
   "license": "MIT",
   "dependencies": {
@@ -20,5 +20,8 @@
     "sequelize": "^6.3.5",
     "sqlite3": "^4.1.0",
     "uniqid": "^5.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
   }
 }
