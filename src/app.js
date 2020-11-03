@@ -3,9 +3,9 @@ require('dotenv').config({ path : '.env'});
 
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const route = require('./http/route');
+const apiRoute = require('./api');
 const bodyParser = require('body-parser');
-const corsMiddleware = require('./http/middlewares/cors-middleware');
+const corsMiddleware = require('./api/middlewares/cors-middleware');
 
 let app = express();
 
@@ -23,7 +23,7 @@ app.use(bodyParser.json())
 app.use(corsMiddleware);
 
 // route
-app.use('/', route);
+app.use('/', apiRoute);
 
 // Error Handler
 app.use(function(err, req, res, next) {
