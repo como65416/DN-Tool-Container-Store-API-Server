@@ -18,7 +18,7 @@ npm ci
 ## Install Server
 
 ```
-node install.js
+npm run install
 ```
 
 ## Start Server

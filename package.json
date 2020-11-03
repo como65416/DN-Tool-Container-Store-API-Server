@@ -1,6 +1,7 @@
 {
   "name": "dn-tool-container-store-api-server",
   "scripts": {
+    "install": "node src/install.js",
     "start": "node src/app.js"
   },
   "license": "MIT",
