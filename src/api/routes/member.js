@@ -2,17 +2,24 @@ const Router = require('express').Router;
 const accountService = require('../../services/account');
 const jwtService = require('../../services/jwt');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
+const { celebrate, Joi, errors, Segments } = require('celebrate');
 
 const router = Router();
 
 module.exports = (app) => {
   app.use('/user', router);
+  app.use(errors());
 
   /**
    * @apiParam {String} username User account username.
    * @apiParam {String} password User password.
    */
-  router.post('/login', async (req, res) => {
+  router.post('/login', celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      username: Joi.string().required(),
+      password: Joi.string().required(),
+    }),
+  }), async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
 
@@ -29,13 +36,13 @@ module.exports = (app) => {
    * @apiHeader {String} Authorization JWT token.
    * @apiParam  {String} password      User account username.
    */
-  router.put('/update-password', [checkJWTMiddleware], async (req, res) => {
+  router.put('/update-password', [checkJWTMiddleware], celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      password: Joi.string().min(8).required(),
+    }),
+  }), async (req, res) => {
     let username = res.locals.username;
     let password = req.body.password;
-
-    if (password == null || password.length < 8) {
-      return res.status(400).json({message: 'password needs to be at least 8 characters'}).end();
-    }
 
     await accountService.updateAccountData(username, {password});
 
@@ -46,7 +53,11 @@ module.exports = (app) => {
    * @apiHeader {String} Authorization JWT token.
    * @apiParam  {String} name          User name.
    */
-  router.put('/update-profile', [checkJWTMiddleware], async (req, res) => {
+  router.put('/update-profile', celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string(),
+    }),
+  }), [checkJWTMiddleware], async (req, res) => {
     let username = res.locals.username;
     let name = req.body.name;
 

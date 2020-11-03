@@ -5,11 +5,13 @@ const Router = require('express').Router;
 const store = require('../../services/store');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 const packagePermissionMiddleware = require('../middlewares/permission-middleware');
+const { celebrate, Joi, errors, Segments } = require('celebrate');
 
 const router = Router();
 
 module.exports = (app) => {
   app.use('/packages', router);
+  app.use(errors());
 
   /**
    * @apiHeader {String} Authorization JWT token.
@@ -41,7 +43,12 @@ module.exports = (app) => {
    * @apiParam  {String} description       package description]
    * @apiParam  {File}   packageFile       package file zip
    */
-  router.post('', [checkJWTMiddleware], async (req, res) => {
+  router.post('', [checkJWTMiddleware], celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+      description: Joi.string().required(),
+    }),
+  }), async (req, res) => {
     let username = res.locals.username;
     let name = req.body.name;
     let description = req.body.description;
@@ -65,7 +72,12 @@ module.exports = (app) => {
    * @apiParam  {String} description   package description]
    * @apiParam  {File}   packageFile   package file zip
    */
-  router.put('/:id', [checkJWTMiddleware, packagePermissionMiddleware], async (req, res) => {
+  router.put('/:id', [checkJWTMiddleware, packagePermissionMiddleware], celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+      description: Joi.string().required(),
+    }),
+  }), async (req, res) => {
     let packageId = encoder.decodeId(req.params.id);
     let name = req.body.name;
     let description = req.body.description;
