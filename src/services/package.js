@@ -132,7 +132,7 @@ async function updatePackage(packageId, packageInfo, filePath) {
   let packageDirPath = environment.getPackageFolderPath();
   if (filePath != null) {
     // update version
-    let version = 'v' + dateFormat('yyyymmdd.HHMMss');
+    let version = dateFormat('yyyymmdd.HHMMss');
     package.version = manifestUpdateDatas.version = version;
     manifestUpdateDatas.packageId = encoder.encodeId(packageId);
 
