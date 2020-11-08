@@ -22,8 +22,8 @@ module.exports = (app) => {
    * update store information
    */
   router.put('/info', [checkJWTMiddleware], async (req, res) => {
-    let name = req.body.storeName;
-    let storeIconPath = (req.files != null) ? req.files.storeIcon.tempFilePath : null;
+    const name = req.body.storeName;
+    const storeIconPath = (req.files != null) ? req.files.storeIcon.tempFilePath : null;
 
     await storeService.updateStoreInfo({name}, storeIconPath);
 
@@ -34,12 +34,12 @@ module.exports = (app) => {
    * get store published packages
    */
   router.get('/packages', async (req, res) => {
-    let baseUrl = req.protocol + "://" + req.headers.host;
-    let storeInfo = await storeService.getStoreInfo();
-    let packages = await packageService.getAllPublishedPackages();
+    const baseUrl = req.protocol + "://" + req.headers.host;
+    const storeInfo = await storeService.getStoreInfo();
+    const packages = await packageService.getAllPublishedPackages();
 
-    let storePackages = packages.map(p => {
-      let encodedPackageId = encoder.encodeId(p.id.toString());
+    const storePackages = packages.map(p => {
+      const encodedPackageId = encoder.encodeId(p.id.toString());
 
       return {
         packageId: encodedPackageId,

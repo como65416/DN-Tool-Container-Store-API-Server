@@ -2,9 +2,9 @@ const jwtService = require('../../services/jwt');
 
 function checkJWTMiddleware(req, res, next) {
   try {
-    let authorization = req.header('Authorization');
-    let token = authorization.match(/^Bearer +(.*?)$/)[1];
-    let data = jwtService.extractTokenData(token);
+    const authorization = req.header('Authorization');
+    const token = authorization.match(/^Bearer +(.*?)$/)[1];
+    const data = jwtService.extractTokenData(token);
 
     Object.assign(res.locals, {
       username: data.username,

@@ -7,7 +7,7 @@ const path = require('path');
  * @return {Object} store infomation
  */
 async function getStoreInfo() {
-  let storeOption = await StoreOption.findOne({
+  const storeOption = await StoreOption.findOne({
     where: {
       'option_name': 'store_name',
     }
@@ -23,7 +23,7 @@ async function getStoreInfo() {
  * @return {String|null}
  */
 async function getStoreIconPath() {
-  let storeOption = await StoreOption.findOne({
+  const storeOption = await StoreOption.findOne({
     where: {
       'option_name': 'icon_filename',
     }
@@ -43,7 +43,7 @@ async function getStoreIconPath() {
  */
 async function updateStoreInfo(info, iconFilePath) {
   if (info.name != null) {
-    let storeOption = await StoreOption.findOne({
+    const storeOption = await StoreOption.findOne({
       where: {
         'option_name': 'store_name',
       }
@@ -53,13 +53,13 @@ async function updateStoreInfo(info, iconFilePath) {
   }
 
   if (iconFilePath != null) {
-    let storeOption = await StoreOption.findOne({
+    const storeOption = await StoreOption.findOne({
       where: {
         'option_name': 'icon_filename',
       }
     });
-    let originIconPath = storeOption.option_value;
-    let iconSavePath = originIconPath || 'store-icon.jpg';
+    const originIconPath = storeOption.option_value;
+    const iconSavePath = originIconPath || 'store-icon.jpg';
     fs.copyFileSync(iconFilePath, environment.getStoreFolderPath() + iconSavePath);
 
     storeOption.option_value = iconSavePath;

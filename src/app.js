@@ -7,7 +7,7 @@ const apiRoute = require('./api');
 const bodyParser = require('body-parser');
 const corsMiddleware = require('./api/middlewares/cors-middleware');
 
-let app = express();
+const app = express();
 
 // use expresss-fileupload
 app.use(fileUpload({

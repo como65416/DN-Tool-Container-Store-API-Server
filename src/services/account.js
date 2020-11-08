@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
  * @param  {String} password
  */
 async function checkAccountPassword(username, password) {
-  let account = await Account.findOne({
+  const account = await Account.findOne({
     where: {
       'username': username,
     }
@@ -22,7 +22,7 @@ async function checkAccountPassword(username, password) {
  * @param  {Object} data
  */
 async function updateAccountData(username, data) {
-  let account = await Account.findOne({
+  const account = await Account.findOne({
     where: {
       'username': username,
     }

@@ -1,10 +1,10 @@
 const { Sequelize } = require('sequelize');
 const config = require('../config');
 
-let host = config.database.host;
-let user = config.database.username;
-let password = config.database.password;
-let database = config.database.name;
+const host = config.database.host;
+const user = config.database.username;
+const password = config.database.password;
+const database = config.database.name;
 
 const sequelize = new Sequelize(database, user, password, {
   host: host,

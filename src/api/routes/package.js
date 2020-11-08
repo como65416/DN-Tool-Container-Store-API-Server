@@ -17,22 +17,21 @@ module.exports = (app) => {
    * @apiHeader {String} Authorization JWT token.
    */
   router.get('', [checkJWTMiddleware], async (req, res) => {
-    let baseUrl = req.protocol + "://" + req.headers.host;
-    let username = res.locals.username;
-    let packages = await packageService.getUserPackages(username);
+    const baseUrl = req.protocol + "://" + req.headers.host;
+    const username = res.locals.username;
+    const packages = (await packageService.getUserPackages(username))
+      .map(p => {
+        const encodedPackageId = encoder.encodeId(p.id.toString());
 
-    packages = packages.map(p => {
-      let encodedPackageId = encoder.encodeId(p.id.toString());
-
-      return {
-        packageId: encodedPackageId,
-        packageName: p.name,
-        version: p.version,
-        iconUrl: baseUrl + "/packages/" + encodedPackageId + "/icon",
-        description: p.description,
-        status: p.status,
-      };
-    });
+        return {
+          packageId: encodedPackageId,
+          packageName: p.name,
+          version: p.version,
+          iconUrl: baseUrl + "/packages/" + encodedPackageId + "/icon",
+          description: p.description,
+          status: p.status,
+        };
+      });
 
     return res.status(200).json(packages).end();
   });
@@ -49,12 +48,12 @@ module.exports = (app) => {
       description: Joi.string().required(),
     }),
   }), async (req, res) => {
-    let username = res.locals.username;
-    let name = req.body.name;
-    let description = req.body.description;
-    let packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
+    const username = res.locals.username;
+    const name = req.body.name;
+    const description = req.body.description;
+    const packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
 
-    let packageId = await packageService.createPackage(username, {name, description}, packageFilePath);
+    const packageId = await packageService.createPackage(username, {name, description}, packageFilePath);
 
     if (packageFilePath != null) {
       fs.unlinkSync(packageFilePath);
@@ -78,10 +77,10 @@ module.exports = (app) => {
       description: Joi.string().required(),
     }),
   }), async (req, res) => {
-    let packageId = encoder.decodeId(req.params.id);
-    let name = req.body.name;
-    let description = req.body.description;
-    let packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
+    const packageId = encoder.decodeId(req.params.id);
+    const name = req.body.name;
+    const description = req.body.description;
+    const packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
 
     await packageService.updatePackage(packageId, {name, description}, packageFilePath);
 
@@ -97,7 +96,7 @@ module.exports = (app) => {
    * @apiParam  {String} id            package id
    */
   router.delete('/:id', [checkJWTMiddleware, packagePermissionMiddleware], async (req, res) => {
-    let packageId = encoder.decodeId(req.params.id);
+    const packageId = encoder.decodeId(req.params.id);
 
     await packageService.deletePackage(packageId);
 
@@ -108,8 +107,8 @@ module.exports = (app) => {
    * @apiParam  {String} id            package id
    */
   router.get('/:id/icon', async (req, res) => {
-    let packageId = encoder.decodeId(req.params.id);
-    let iconFilePath = await packageService.getPackageIconPath(packageId);
+    const packageId = encoder.decodeId(req.params.id);
+    const iconFilePath = await packageService.getPackageIconPath(packageId);
 
     if (iconFilePath == null) {
       return res.status(404).send('Not found').end();
@@ -122,8 +121,8 @@ module.exports = (app) => {
    * @apiParam  {String} id            package id
    */
   router.get('/:id/download', async (req, res) => {
-    let packageId = encoder.decodeId(req.params.id);
-    let packageFilePath = await packageService.getPackageZipPath(packageId);
+    const packageId = encoder.decodeId(req.params.id);
+    const packageFilePath = await packageService.getPackageZipPath(packageId);
 
     if (packageFilePath == null) {
       return res.status(404).send('Not found').end();

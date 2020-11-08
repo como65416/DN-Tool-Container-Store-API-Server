@@ -20,11 +20,11 @@ module.exports = (app) => {
       password: Joi.string().required(),
     }),
   }), async (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
+    const username = req.body.username;
+    const password = req.body.password;
 
     if (await accountService.checkAccountPassword(username, password)) {
-      let token = jwtService.generateToken({username}, 86400);
+      const token = jwtService.generateToken({username}, 86400);
 
       return res.status(200).json({token}).end();
     }
@@ -41,8 +41,8 @@ module.exports = (app) => {
       password: Joi.string().min(8).required(),
     }),
   }), async (req, res) => {
-    let username = res.locals.username;
-    let password = req.body.password;
+    const username = res.locals.username;
+    const password = req.body.password;
 
     await accountService.updateAccountData(username, {password});
 
@@ -58,8 +58,8 @@ module.exports = (app) => {
       name: Joi.string(),
     }),
   }), [checkJWTMiddleware], async (req, res) => {
-    let username = res.locals.username;
-    let name = req.body.name;
+    const username = res.locals.username;
+    const name = req.body.name;
 
     if (name == null || name.length < 1) {
       return res.status(400).json({message: 'name needs to be at least 1 characters'}).end();

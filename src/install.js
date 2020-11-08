@@ -33,8 +33,8 @@ inquirer.prompt([
   }
 ])
 .then(async (answers) => {
-  let jwt_key = cryptoRandomString({length: 32, type: 'base64'});
-  let crypto_key = cryptoRandomString({length: 32, type: 'base64'});
+  const jwt_key = cryptoRandomString({length: 32, type: 'base64'});
+  const crypto_key = cryptoRandomString({length: 32, type: 'base64'});
 
   // generate .env content
   let env_content = '';
@@ -57,7 +57,7 @@ inquirer.prompt([
   env_content += 'CRYPTO_KEY=' + crypto_key + '\n';
 
   // save and locd .env file
-  let env_path = __dirname + "/.env";
+  const env_path = __dirname + "/.env";
   fs.writeFileSync(env_path, env_content);
   dotenv.config({ path : '.env'});
 

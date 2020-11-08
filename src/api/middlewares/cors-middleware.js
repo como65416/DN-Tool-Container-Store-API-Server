@@ -1,8 +1,8 @@
 const config = require('../../config');
 
 function corsMiddleware (req, res, next) {
-  let availableDomains = config.cors.domains;
-  let url = (req.get('origin')) ? new URL(req.get('origin')) : null;
+  const availableDomains = config.cors.domains;
+  const url = (req.get('origin')) ? new URL(req.get('origin')) : null;
 
   if (url != null && availableDomains.includes(url.host)) {
     res.header('Access-Control-Allow-Origin', req.get('origin'));

@@ -8,7 +8,7 @@ async function install(sequelize) {
   await Package(sequelize).sync();
   await StoreOption(sequelize).sync();
 
-  let salt = bcrypt.genSaltSync(10);
+  const salt = bcrypt.genSaltSync(10);
   await Account(sequelize).bulkCreate([
     {username: 'admin', password: bcrypt.hashSync('admin', salt), name: 'Admin'},
   ]);
