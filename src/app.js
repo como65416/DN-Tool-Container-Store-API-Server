@@ -3,6 +3,7 @@ const fileUpload = require('express-fileupload');
 const apiRoute = require('./api');
 const bodyParser = require('body-parser');
 const corsMiddleware = require('./api/middlewares/cors-middleware');
+const errorHandler = require('./errors/handler');
 
 const app = express();
 
@@ -16,17 +17,14 @@ app.use(fileUpload({
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-// middleware
+// enable cors
 app.use(corsMiddleware);
 
 // route
 app.use('/', apiRoute);
 
-// Error Handler
-app.use(function(err, req, res, next) {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
+// error Handler
+app.use(errorHandler);
 
 app.listen(3000, function () {
   console.log('app listening on port 3000!');
