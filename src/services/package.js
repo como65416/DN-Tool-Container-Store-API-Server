@@ -1,6 +1,6 @@
 const AdmZip = require('adm-zip');
 const dateFormat = require('dateformat');
-const encoder = require('../libs/encoder');
+const encoderService = require('../services/encoder');
 const environment = require('../services/environment');
 const fs = require('fs');
 const path = require('path');
@@ -90,7 +90,7 @@ async function createPackage(username, packageInfo, filePath) {
 
     // update zip manifest.json config
     await updateZipManifestConfig(filePath, {
-      'packageId': encoder.encodeId(package.id.toString()),
+      'packageId': encoderService.encodeId(package.id.toString()),
       'description': packageInfo.description,
       'packageName': packageInfo.name
     });
@@ -134,7 +134,7 @@ async function updatePackage(packageId, packageInfo, filePath) {
     // update version
     const version = dateFormat('yyyymmdd.HHMMss');
     package.version = manifestUpdateDatas.version = version;
-    manifestUpdateDatas.packageId = encoder.encodeId(packageId);
+    manifestUpdateDatas.packageId = encoderService.encodeId(packageId);
 
     // extract icon file from package zip
     const iconDirPath = environment.getIconFolderPath();

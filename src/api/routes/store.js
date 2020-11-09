@@ -1,4 +1,4 @@
-const encoder = require('../../libs/encoder');
+const encoderService = require('../../services/encoder');
 const storeService = require('../../services/store');
 const packageService = require('../../services/package');
 const Router = require('express').Router;
@@ -39,7 +39,7 @@ module.exports = (app) => {
     const packages = await packageService.getAllPublishedPackages();
 
     const storePackages = packages.map(p => {
-      const encodedPackageId = encoder.encodeId(p.id.toString());
+      const encodedPackageId = encoderService.encodeId(p.id.toString());
 
       return {
         packageId: encodedPackageId,

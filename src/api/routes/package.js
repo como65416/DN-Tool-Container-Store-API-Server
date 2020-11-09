@@ -1,4 +1,4 @@
-const encoder = require('../../libs/encoder');
+const encoderService = require('../../services/encoder');
 const fs = require('fs');
 const packageService = require('../../services/package');
 const Router = require('express').Router;
@@ -22,7 +22,7 @@ module.exports = (app) => {
     const username = res.locals.username;
     const packages = (await packageService.getUserPackages(username))
       .map(p => {
-        const encodedPackageId = encoder.encodeId(p.id.toString());
+        const encodedPackageId = encoderService.encodeId(p.id.toString());
 
         return {
           packageId: encodedPackageId,
@@ -61,7 +61,7 @@ module.exports = (app) => {
     }
 
     res.status(201).send({
-      packageId: encoder.encodeId(packageId)
+      packageId: encoderService.encodeId(packageId)
     });
   });
 
@@ -78,7 +78,7 @@ module.exports = (app) => {
       description: Joi.string().required(),
     }),
   }), async (req, res) => {
-    const packageId = encoder.decodeId(req.params.id);
+    const packageId = encoderService.decodeId(req.params.id);
     const name = req.body.name;
     const description = req.body.description;
     const packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
@@ -97,7 +97,7 @@ module.exports = (app) => {
    * @apiParam  {String} id            package id
    */
   router.delete('/:id', [checkJWTMiddleware, packagePermissionMiddleware], async (req, res) => {
-    const packageId = encoder.decodeId(req.params.id);
+    const packageId = encoderService.decodeId(req.params.id);
 
     await packageService.deletePackage(packageId);
 
@@ -108,7 +108,7 @@ module.exports = (app) => {
    * @apiParam  {String} id            package id
    */
   router.get('/:id/icon', async (req, res, next) => {
-    const packageId = encoder.decodeId(req.params.id);
+    const packageId = encoderService.decodeId(req.params.id);
     const iconFilePath = await packageService.getPackageIconPath(packageId);
 
     if (iconFilePath == null) {
@@ -122,7 +122,7 @@ module.exports = (app) => {
    * @apiParam  {String} id            package id
    */
   router.get('/:id/download', async (req, res) => {
-    const packageId = encoder.decodeId(req.params.id);
+    const packageId = encoderService.decodeId(req.params.id);
     const packageFilePath = await packageService.getPackageZipPath(packageId);
 
     if (packageFilePath == null) {
