@@ -3,16 +3,16 @@ const config = require('../config');
 
 const key = config.crypt.key;
 
-function encodeId($data) {
+function encodeId($id) {
   const hashids = new Hashids(key);
 
-  return hashids.encode($data);
+  return hashids.encode($id);
 }
 
-function decodeId($encoded_data) {
+function decodeId($encoded_id) {
   const hashids = new Hashids(key);
 
-  return hashids.decode($encoded_data)[0] || null;
+  return hashids.decode($encoded_id)[0] || null;
 }
 
 module.exports = {
