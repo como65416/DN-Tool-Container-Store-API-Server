@@ -8,6 +8,7 @@
   "dependencies": {
     "adm-zip": "^0.4.13",
     "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
     "celebrate": "^13.0.3",
     "crypto-random-string": "^3.0.1",
     "dateformat": "^3.0.3",
@@ -23,6 +24,10 @@
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "nodemon": "^2.0.6"
   }
 }
