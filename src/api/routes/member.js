@@ -1,8 +1,10 @@
-const Router = require('express').Router;
+const { Router } = require('express');
+const {
+  celebrate, Joi, errors, Segments,
+} = require('celebrate');
 const accountService = require('../../services/account');
 const jwtService = require('../../services/jwt');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
-const { celebrate, Joi, errors, Segments } = require('celebrate');
 const UnauthorizedError = require('../../errors/unauthorized-error');
 
 const router = Router();
@@ -21,16 +23,16 @@ module.exports = (app) => {
       password: Joi.string().required(),
     }),
   }), async (req, res, next) => {
-    const username = req.body.username;
-    const password = req.body.password;
+    const { username } = req.body;
+    const { password } = req.body;
 
     if (!await accountService.checkAccountPassword(username, password)) {
       return next(new UnauthorizedError('login fail'));
     }
 
-    const token = jwtService.generateToken({username}, 86400);
+    const token = jwtService.generateToken({ username }, 86400);
 
-    return res.status(200).json({token}).end();
+    return res.status(200).json({ token }).end();
   });
 
   /**
@@ -42,10 +44,10 @@ module.exports = (app) => {
       password: Joi.string().min(8).required(),
     }),
   }), async (req, res) => {
-    const username = res.locals.username;
-    const password = req.body.password;
+    const { username } = res.locals;
+    const { password } = req.body;
 
-    await accountService.updateAccountData(username, {password});
+    await accountService.updateAccountData(username, { password });
 
     res.status(204).send('');
   });
@@ -59,11 +61,11 @@ module.exports = (app) => {
       name: Joi.string().min(1),
     }),
   }), [checkJWTMiddleware], async (req, res) => {
-    const username = res.locals.username;
-    const name = req.body.name;
+    const { username } = res.locals;
+    const { name } = req.body;
 
-    await accountService.updateAccountData(username, {name});
+    await accountService.updateAccountData(username, { name });
 
     res.status(204).send('').end();
   });
-}
+};

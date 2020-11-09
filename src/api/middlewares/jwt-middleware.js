@@ -14,7 +14,7 @@ function checkJWTMiddleware(req, res, next) {
     return next(new UnauthorizedError('token not valid'));
   }
 
-  next();
+  return next();
 }
 
 module.exports = checkJWTMiddleware;

@@ -1,7 +1,7 @@
-const StoreOption = require('../models').StoreOption;
-const environment = require('../services/environment');
 const fs = require('fs');
 const path = require('path');
+const { StoreOption } = require('../models');
+const environment = require('../libs/environment');
 
 /**
  * @return {Object} store infomation
@@ -9,13 +9,13 @@ const path = require('path');
 async function getStoreInfo() {
   const storeOption = await StoreOption.findOne({
     where: {
-      'option_name': 'store_name',
-    }
+      option_name: 'store_name',
+    },
   });
 
   return {
-    'name': storeOption.option_value
-  }
+    name: storeOption.option_value,
+  };
 }
 
 /**
@@ -25,12 +25,12 @@ async function getStoreInfo() {
 async function getStoreIconPath() {
   const storeOption = await StoreOption.findOne({
     where: {
-      'option_name': 'icon_filename',
-    }
+      option_name: 'icon_filename',
+    },
   });
 
   let iconPath = environment.getDefaultStoreIconPath();
-  if (storeOption != null && storeOption.option_value != '') {
+  if (storeOption != null && storeOption.option_value !== '') {
     iconPath = environment.getStoreFolderPath() + storeOption.option_value;
   }
 
@@ -45,8 +45,8 @@ async function updateStoreInfo(info, iconFilePath) {
   if (info.name != null) {
     const storeOption = await StoreOption.findOne({
       where: {
-        'option_name': 'store_name',
-      }
+        option_name: 'store_name',
+      },
     });
     storeOption.option_value = info.name;
     await storeOption.save();
@@ -55,8 +55,8 @@ async function updateStoreInfo(info, iconFilePath) {
   if (iconFilePath != null) {
     const storeOption = await StoreOption.findOne({
       where: {
-        'option_name': 'icon_filename',
-      }
+        option_name: 'icon_filename',
+      },
     });
     const originIconPath = storeOption.option_value;
     const iconSavePath = originIconPath || 'store-icon.jpg';
@@ -71,4 +71,4 @@ module.exports = {
   getStoreInfo,
   getStoreIconPath,
   updateStoreInfo,
-}
+};

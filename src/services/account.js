@@ -1,5 +1,5 @@
-const Account = require('../models').Account;
 const bcrypt = require('bcrypt');
+const { Account } = require('../models');
 
 /**
  * @param  {Object} query knex object or knex transaction
@@ -9,8 +9,8 @@ const bcrypt = require('bcrypt');
 async function checkAccountPassword(username, password) {
   const account = await Account.findOne({
     where: {
-      'username': username,
-    }
+      username,
+    },
   });
 
   return account != null && bcrypt.compareSync(password, account.password);
@@ -24,8 +24,8 @@ async function checkAccountPassword(username, password) {
 async function updateAccountData(username, data) {
   const account = await Account.findOne({
     where: {
-      'username': username,
-    }
+      username,
+    },
   });
 
   if (data.password != null) {
@@ -39,4 +39,4 @@ async function updateAccountData(username, data) {
 module.exports = {
   checkAccountPassword,
   updateAccountData,
-}
+};

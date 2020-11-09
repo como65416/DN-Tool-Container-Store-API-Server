@@ -1,11 +1,12 @@
-const encoderService = require('../../services/encoder');
 const fs = require('fs');
+const { Router } = require('express');
+const {
+  celebrate, Joi, errors, Segments,
+} = require('celebrate');
+const encoderService = require('../../services/encoder');
 const packageService = require('../../services/package');
-const Router = require('express').Router;
-const store = require('../../services/store');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 const packagePermissionMiddleware = require('../middlewares/permission-middleware');
-const { celebrate, Joi, errors, Segments } = require('celebrate');
 const NotFoundError = require('../../errors/not-found-error');
 
 const router = Router();
@@ -18,17 +19,17 @@ module.exports = (app) => {
    * @apiHeader {String} Authorization JWT token.
    */
   router.get('', [checkJWTMiddleware], async (req, res) => {
-    const baseUrl = req.protocol + "://" + req.headers.host;
-    const username = res.locals.username;
+    const baseUrl = `${req.protocol}://${req.headers.host}`;
+    const { username } = res.locals;
     const packages = (await packageService.getUserPackages(username))
-      .map(p => {
+      .map((p) => {
         const encodedPackageId = encoderService.encodeId(p.id.toString());
 
         return {
           packageId: encodedPackageId,
           packageName: p.name,
           version: p.version,
-          iconUrl: baseUrl + "/packages/" + encodedPackageId + "/icon",
+          iconUrl: `${baseUrl}/packages/${encodedPackageId}/icon`,
           description: p.description,
           status: p.status,
         };
@@ -49,19 +50,23 @@ module.exports = (app) => {
       description: Joi.string().required(),
     }),
   }), async (req, res) => {
-    const username = res.locals.username;
-    const name = req.body.name;
-    const description = req.body.description;
+    const { username } = res.locals;
+    const { name } = req.body;
+    const { description } = req.body;
     const packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
 
-    const packageId = await packageService.createPackage(username, {name, description}, packageFilePath);
+    const packageId = await packageService.createPackage(
+      username,
+      { name, description },
+      packageFilePath,
+    );
 
     if (packageFilePath != null) {
       fs.unlinkSync(packageFilePath);
     }
 
     res.status(201).send({
-      packageId: encoderService.encodeId(packageId)
+      packageId: encoderService.encodeId(packageId),
     });
   });
 
@@ -79,17 +84,17 @@ module.exports = (app) => {
     }),
   }), async (req, res) => {
     const packageId = encoderService.decodeId(req.params.id);
-    const name = req.body.name;
-    const description = req.body.description;
+    const { name } = req.body;
+    const { description } = req.body;
     const packageFilePath = (req.files != null) ? req.files.packageFile.tempFilePath : null;
 
-    await packageService.updatePackage(packageId, {name, description}, packageFilePath);
+    await packageService.updatePackage(packageId, { name, description }, packageFilePath);
 
     if (packageFilePath != null) {
       fs.unlinkSync(packageFilePath);
     }
 
-    res.status(204).send('')
+    res.status(204).send('');
   });
 
   /**
@@ -101,7 +106,7 @@ module.exports = (app) => {
 
     await packageService.deletePackage(packageId);
 
-    res.status(204).send('')
+    res.status(204).send('');
   });
 
   /**
@@ -115,13 +120,13 @@ module.exports = (app) => {
       return next(new NotFoundError('Not found'));
     }
 
-    res.status(200).sendFile(iconFilePath);
+    return res.status(200).sendFile(iconFilePath);
   });
 
   /**
    * @apiParam  {String} id            package id
    */
-  router.get('/:id/download', async (req, res) => {
+  router.get('/:id/download', async (req, res, next) => {
     const packageId = encoderService.decodeId(req.params.id);
     const packageFilePath = await packageService.getPackageZipPath(packageId);
 
@@ -129,6 +134,6 @@ module.exports = (app) => {
       return next(new NotFoundError('Not found'));
     }
 
-    res.status(200).sendFile(packageFilePath);
+    return res.status(200).sendFile(packageFilePath);
   });
-}
+};

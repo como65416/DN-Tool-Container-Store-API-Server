@@ -10,15 +10,15 @@ async function install(sequelize) {
 
   const salt = bcrypt.genSaltSync(10);
   await Account(sequelize).bulkCreate([
-    {username: 'admin', password: bcrypt.hashSync('admin', salt), name: 'Admin'},
+    { username: 'admin', password: bcrypt.hashSync('admin', salt), name: 'Admin' },
   ]);
 
   await StoreOption(sequelize).bulkCreate([
-    {option_name: 'store_name', option_value: 'My Custom DN Tool Package Store'},
-    {option_name: 'icon_filename', option_value: ''},
+    { option_name: 'store_name', option_value: 'My Custom DN Tool Package Store' },
+    { option_name: 'icon_filename', option_value: '' },
   ]);
 }
 
 module.exports = {
-  install
-}
+  install,
+};

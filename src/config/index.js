@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 
-dotenv.config({ path : '.env'});
+dotenv.config({ path: '.env' });
 
 module.exports = {
   database: {
@@ -17,5 +17,5 @@ module.exports = {
   },
   cors: {
     domains: process.env.AVAILABLE_DOMAINS.split(',') || [],
-  }
+  },
 };

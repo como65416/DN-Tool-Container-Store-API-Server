@@ -1,7 +1,7 @@
 const Hashids = require('hashids/cjs');
 const config = require('../config');
 
-const key = config.crypt.key;
+const { key } = config.crypt;
 
 function encodeId($id) {
   const hashids = new Hashids(key);
@@ -9,13 +9,13 @@ function encodeId($id) {
   return hashids.encode($id);
 }
 
-function decodeId($encoded_id) {
+function decodeId($encodedId) {
   const hashids = new Hashids(key);
 
-  return hashids.decode($encoded_id)[0] || null;
+  return hashids.decode($encodedId)[0] || null;
 }
 
 module.exports = {
   encodeId,
   decodeId,
-}
+};
