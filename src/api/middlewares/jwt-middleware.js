@@ -1,4 +1,5 @@
 const jwtService = require('../../services/jwt');
+const UnauthorizedError = require('../../errors/unauthorized-error');
 
 function checkJWTMiddleware(req, res, next) {
   try {
@@ -10,7 +11,7 @@ function checkJWTMiddleware(req, res, next) {
       username: data.username,
     });
   } catch (e) {
-    return res.status(401).json({message: 'token not valid'}).end();
+    return next(new UnauthorizedError('token not valid'));
   }
 
   next();

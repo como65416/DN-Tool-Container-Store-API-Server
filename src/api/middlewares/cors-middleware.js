@@ -1,6 +1,6 @@
 const config = require('../../config');
 
-function corsMiddleware (req, res, next) {
+function corsMiddleware(req, res, next) {
   const availableDomains = config.cors.domains;
   const url = (req.get('origin')) ? new URL(req.get('origin')) : null;
 
@@ -13,8 +13,8 @@ function corsMiddleware (req, res, next) {
   }
 
   if (req.method == 'OPTIONS') {
-      res.status(200).send('');
-      return;
+    res.status(200).send('');
+    return;
   }
 
   next();

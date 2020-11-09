@@ -6,6 +6,7 @@ const store = require('../../services/store');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 const packagePermissionMiddleware = require('../middlewares/permission-middleware');
 const { celebrate, Joi, errors, Segments } = require('celebrate');
+const NotFoundError = require('../../errors/not-found-error');
 
 const router = Router();
 
@@ -106,12 +107,12 @@ module.exports = (app) => {
   /**
    * @apiParam  {String} id            package id
    */
-  router.get('/:id/icon', async (req, res) => {
+  router.get('/:id/icon', async (req, res, next) => {
     const packageId = encoder.decodeId(req.params.id);
     const iconFilePath = await packageService.getPackageIconPath(packageId);
 
     if (iconFilePath == null) {
-      return res.status(404).send('Not found').end();
+      return next(new NotFoundError('Not found'));
     }
 
     res.status(200).sendFile(iconFilePath);
@@ -125,7 +126,7 @@ module.exports = (app) => {
     const packageFilePath = await packageService.getPackageZipPath(packageId);
 
     if (packageFilePath == null) {
-      return res.status(404).send('Not found').end();
+      return next(new NotFoundError('Not found'));
     }
 
     res.status(200).sendFile(packageFilePath);

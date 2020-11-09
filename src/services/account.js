@@ -13,7 +13,7 @@ async function checkAccountPassword(username, password) {
     }
   });
 
-  return bcrypt.compareSync(password, account.password);
+  return account != null && bcrypt.compareSync(password, account.password);
 }
 
 /**

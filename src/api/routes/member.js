@@ -3,6 +3,7 @@ const accountService = require('../../services/account');
 const jwtService = require('../../services/jwt');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 const { celebrate, Joi, errors, Segments } = require('celebrate');
+const UnauthorizedError = require('../../errors/unauthorized-error');
 
 const router = Router();
 
@@ -19,17 +20,17 @@ module.exports = (app) => {
       username: Joi.string().required(),
       password: Joi.string().required(),
     }),
-  }), async (req, res) => {
+  }), async (req, res, next) => {
     const username = req.body.username;
     const password = req.body.password;
 
-    if (await accountService.checkAccountPassword(username, password)) {
-      const token = jwtService.generateToken({username}, 86400);
-
-      return res.status(200).json({token}).end();
+    if (!await accountService.checkAccountPassword(username, password)) {
+      return next(new UnauthorizedError('login fail'));
     }
 
-    res.status(401).json({'message': 'login fail'}).end();
+    const token = jwtService.generateToken({username}, 86400);
+
+    return res.status(200).json({token}).end();
   });
 
   /**
@@ -55,15 +56,11 @@ module.exports = (app) => {
    */
   router.put('/update-profile', celebrate({
     [Segments.BODY]: Joi.object().keys({
-      name: Joi.string(),
+      name: Joi.string().min(1),
     }),
   }), [checkJWTMiddleware], async (req, res) => {
     const username = res.locals.username;
     const name = req.body.name;
-
-    if (name == null || name.length < 1) {
-      return res.status(400).json({message: 'name needs to be at least 1 characters'}).end();
-    }
 
     await accountService.updateAccountData(username, {name});
 
