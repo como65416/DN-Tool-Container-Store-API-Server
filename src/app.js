@@ -10,6 +10,7 @@ const app = express();
 // use expresss-fileupload
 app.use(fileUpload({
   useTempFiles: true,
+  tempFileDir: __dirname + '/../storage/tmp',
   limits: { fileSize: 30 * 1024 * 1024 },
 }));
 
