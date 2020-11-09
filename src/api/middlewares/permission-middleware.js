@@ -8,7 +8,7 @@ async function checkPackagePermission(req, res, next) {
   const packageId = encoder.decodeId(req.params.id);
   const package = await packageService.getPackageInfo(packageId);
 
-  if (package == null || package.publish_username != username) {
+  if (package == null || package.publish_username !== username) {
     return next(new UnauthorizedError('Unauthorized'));
   }
 

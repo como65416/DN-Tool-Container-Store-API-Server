@@ -34,13 +34,13 @@ async function deletePackage(packageId) {
 
   // delete icon
   const iconDirPath = environment.getIconFolderPath();
-  if (package.icon_filename != null && package.icon_filename != '' && fs.existsSync(iconDirPath + package.icon_filename)) {
+  if (package.icon_filename != null && package.icon_filename !== '' && fs.existsSync(iconDirPath + package.icon_filename)) {
     fs.unlinkSync(iconDirPath + package.icon_filename);
   }
 
   // delete zip
   const packageDirPath = environment.getPackageFolderPath();
-  if (package.package_filename != null && package.package_filename != '' && fs.existsSync(packageDirPath + package.package_filename)) {
+  if (package.package_filename != null && package.package_filename !== '' && fs.existsSync(packageDirPath + package.package_filename)) {
     fs.unlinkSync(packageDirPath + package.package_filename);
   }
 
@@ -138,7 +138,7 @@ async function updatePackage(packageId, packageInfo, filePath) {
 
     // extract icon file from package zip
     const iconDirPath = environment.getIconFolderPath();
-    if (package.icon_filename != null && package.icon_filename != '' && fs.existsSync(iconDirPath + package.icon_filename)) {
+    if (package.icon_filename != null && package.icon_filename !== '' && fs.existsSync(iconDirPath + package.icon_filename)) {
       fs.unlinkSync(iconDirPath + package.icon_filename);
     }
     const iconSaveFilename = packageId + '-' + uniqid() + '.jpg';
