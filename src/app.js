@@ -1,6 +1,3 @@
-// read .env config first
-require('dotenv').config({ path : '.env'});
-
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const apiRoute = require('./api');
