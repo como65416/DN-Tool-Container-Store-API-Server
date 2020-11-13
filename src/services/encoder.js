@@ -1,21 +1,23 @@
 const Hashids = require('hashids/cjs');
-const config = require('../config');
 
-const { key } = config.crypt;
+class Encoder {
+  key = '';
 
-function encodeId($id) {
-  const hashids = new Hashids(key);
+  constructor(key) {
+    this.key = key;
+  }
 
-  return hashids.encode($id);
+  encodeId($id) {
+    const hashids = new Hashids(this.key);
+
+    return hashids.encode($id);
+  }
+
+  decodeId($encodedId) {
+    const hashids = new Hashids(this.key);
+
+    return hashids.decode($encodedId)[0] || null;
+  }
 }
 
-function decodeId($encodedId) {
-  const hashids = new Hashids(key);
-
-  return hashids.decode($encodedId)[0] || null;
-}
-
-module.exports = {
-  encodeId,
-  decodeId,
-};
+module.exports = Encoder;

@@ -1,30 +1,32 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config');
 
-function generateToken(data, time) {
-  const jwtKey = config.jwt.key;
-  const payload = {
-    data,
-    exp: parseInt((new Date()).getTime() / 1000, 10) + time,
-  };
+class Jwt {
+  key = '';
 
-  const token = jwt.sign(payload, jwtKey);
-
-  return token;
-}
-
-function extractTokenData(token) {
-  const jwtKey = config.jwt.key;
-  const payload = jwt.verify(token, jwtKey);
-
-  if (payload.exp < parseInt((new Date()).getTime() / 1000, 10)) {
-    throw new Error('token is expired.');
+  constructor(key) {
+    this.key = key;
   }
 
-  return payload.data;
+  generateToken(data, time) {
+    const payload = {
+      data,
+      exp: parseInt((new Date()).getTime() / 1000, 10) + time,
+    };
+
+    const token = jwt.sign(payload, this.key);
+
+    return token;
+  }
+
+  extractTokenData(token) {
+    const payload = jwt.verify(token, this.key);
+
+    if (payload.exp < parseInt((new Date()).getTime() / 1000, 10)) {
+      throw new Error('token is expired.');
+    }
+
+    return payload.data;
+  }
 }
 
-module.exports = {
-  generateToken,
-  extractTokenData,
-};
+module.exports = Jwt;
