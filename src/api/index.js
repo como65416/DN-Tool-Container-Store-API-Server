@@ -3,10 +3,12 @@ const memberRoute = require('./routes/member');
 const packageRoute = require('./routes/package');
 const storeRoute = require('./routes/store');
 
-const router = express.Router();
+module.exports = function () {
+  const router = express.Router();
 
-memberRoute(router);
-packageRoute(router);
-storeRoute(router);
+  memberRoute(router);
+  packageRoute(router);
+  storeRoute(router);
 
-module.exports = router;
+  return router;
+};

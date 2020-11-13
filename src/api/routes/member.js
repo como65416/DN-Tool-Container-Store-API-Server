@@ -1,9 +1,8 @@
+const { Container } = require('typedi');
 const { Router } = require('express');
 const {
   celebrate, Joi, errors, Segments,
 } = require('celebrate');
-const accountService = require('../../services/account');
-const jwtService = require('../../services/jwt');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 const UnauthorizedError = require('../../errors/unauthorized-error');
 
@@ -12,6 +11,9 @@ const router = Router();
 module.exports = (app) => {
   app.use('/user', router);
   app.use(errors());
+
+  const accountService = Container.get('accountService');
+  const jwtService = Container.get('jwtService');
 
   /**
    * @apiParam {String} username User account username.

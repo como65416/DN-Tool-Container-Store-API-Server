@@ -1,10 +1,9 @@
 const fs = require('fs');
+const { Container } = require('typedi');
 const { Router } = require('express');
 const {
   celebrate, Joi, errors, Segments,
 } = require('celebrate');
-const encoderService = require('../../services/encoder');
-const packageService = require('../../services/package');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 const packagePermissionMiddleware = require('../middlewares/permission-middleware');
 const NotFoundError = require('../../errors/not-found-error');
@@ -14,6 +13,9 @@ const router = Router();
 module.exports = (app) => {
   app.use('/packages', router);
   app.use(errors());
+
+  const encoderService = Container.get('encoderService');
+  const packageService = Container.get('packageService');
 
   /**
    * @apiHeader {String} Authorization JWT token.

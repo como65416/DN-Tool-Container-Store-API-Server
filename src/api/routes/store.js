@@ -1,13 +1,15 @@
 const { Router } = require('express');
-const encoderService = require('../../services/encoder');
-const storeService = require('../../services/store');
-const packageService = require('../../services/package');
+const { Container } = require('typedi');
 const checkJWTMiddleware = require('../middlewares/jwt-middleware');
 
 const router = Router();
 
 module.exports = (app) => {
   app.use('/store', router);
+
+  const encoderService = Container.get('encoderService');
+  const storeService = Container.get('storeService');
+  const packageService = Container.get('packageService');
 
   /**
    * get store icon image

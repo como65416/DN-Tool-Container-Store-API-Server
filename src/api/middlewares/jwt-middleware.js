@@ -1,7 +1,9 @@
-const jwtService = require('../../services/jwt');
+const { Container } = require('typedi');
 const UnauthorizedError = require('../../errors/unauthorized-error');
 
 function checkJWTMiddleware(req, res, next) {
+  const jwtService = Container.get('jwtService');
+
   try {
     const authorization = req.header('Authorization');
     const token = authorization.match(/^Bearer +(.*?)$/)[1];
