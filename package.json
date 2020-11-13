@@ -21,6 +21,7 @@
     "mysql2": "^2.2.5",
     "sequelize": "^6.3.5",
     "sqlite3": "^4.1.0",
+    "typedi": "^0.8.0",
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
