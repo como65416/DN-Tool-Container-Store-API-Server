@@ -13,5 +13,6 @@ module.exports = {
   },
   rules: {
     "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
+    "class-methods-use-this": "off",
   },
 };
